@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Agency Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg0:#0a0b0f; --bg1:#10111a; --bg2:#151622; --bg3:#1b1d2c; --bg4:#222538;
+  --border:#23253a; --border2:#2e3150;
+  --violet:#8b5cf6; --cyan:#22d3ee; --pink:#f472b6;
+  --amber:#fbbf24; --red:#fb7185; --green:#34d399;
+  --text:#eceaf5; --text2:#9c9cc0; --text3:#5e5e80;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg0);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+.mono{font-family:'JetBrains Mono',monospace}
+
+nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:0.5px;white-space:nowrap;margin-right:8px}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));box-shadow:0 0 8px rgba(139,92,246,.7)}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);border:none;background:none;transition:all .15s}
+.nav-tab:hover{color:var(--text);background:var(--bg3)}
+.nav-tab.active{color:var(--violet);background:rgba(139,92,246,.12)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.period-btns{display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px}
+.period-btn{padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--text2);border:none;background:none;transition:all .15s}
+.period-btn.active{color:var(--text);background:var(--bg4)}
+
+main{padding:72px 20px 40px;max-width:1440px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+
+.section{margin-bottom:28px}
+.section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card:hover{border-color:var(--border2)}
+.kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;border-top-width:2px;transition:all .15s}
+.kpi-card:hover{background:var(--bg3)}
+.kpi-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;line-height:1}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:5px}
+
+.goal-bar-track{height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin:6px 0}
+.goal-bar-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:5px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.goal-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
+
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--border);font-size:13px;white-space:nowrap}
+tr:hover td{background:var(--bg3)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(52,211,153,.15);color:var(--green)}
+.badge-amber{background:rgba(251,191,36,.15);color:var(--amber)}
+.badge-cyan{background:rgba(34,211,238,.15);color:var(--cyan)}
+.badge-red{background:rgba(251,113,133,.15);color:var(--red)}
+.badge-violet{background:rgba(139,92,246,.15);color:var(--violet)}
+
+.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0a0b0f;margin-right:8px;vertical-align:middle}
+.rep-row{display:flex;align-items:center}
+.chart-box{position:relative;height:260px}
+.chart-box-sm{position:relative;height:180px}
+
+.rank{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--bg4);color:var(--text2)}
+.rank.r1{background:rgba(251,191,36,.2);color:var(--amber)}
+.rank.r2{background:rgba(156,156,192,.2);color:var(--text)}
+.rank.r3{background:rgba(139,92,246,.2);color:var(--violet)}
+
+@media (max-width:1000px){.grid-4,.grid-5,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><span class="dot"></span>Janier Sales</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="pipeline">Pipeline</button>
+    <button class="nav-tab" data-page="performance">Rep Performance</button>
+    <button class="nav-tab" data-page="revenue">Revenue & Commissions</button>
+    <button class="nav-tab" data-page="accounts">Accounts</button>
+  </div>
+  <div class="nav-right">
+    <div class="period-btns">
+      <button class="period-btn">7D</button>
+      <button class="period-btn active">30D</button>
+      <button class="period-btn">QTR</button>
+      <button class="period-btn">YTD</button>
+    </div>
+    <span class="mono" style="font-size:11px;color:var(--text3)">SAMPLE DATA</span>
+  </div>
+</nav>
+
+<main>
+
+<!-- PIPELINE -->
+<div class="page active" id="page-pipeline">
+  <div class="section">
+    <div class="section-title">Pipeline Overview</div>
+    <div class="grid-4">
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">Open Pipeline Value</div>
+        <div class="kpi-value">$1.84M</div>
+        <div class="kpi-sub">87 active deals</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">Weighted Forecast</div>
+        <div class="kpi-value">$612K</div>
+        <div class="kpi-sub">probability-adjusted</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Win Rate (30d)</div>
+        <div class="kpi-value">38.4%</div>
+        <div class="kpi-sub" style="color:var(--green)">▲ 3.1pt vs prior</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Avg Sales Cycle</div>
+        <div class="kpi-value">22.5 days</div>
+        <div class="kpi-sub">close date - created date</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Pipeline by Stage</div>
+        <div class="chart-box"><canvas id="chartStage"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="section-title">New vs Closed (12 weeks)</div>
+        <div class="chart-box"><canvas id="chartFlow"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Open Deals</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Deal</th><th>Account</th><th>Owner</th><th>Stage</th><th>Value</th><th>Prob.</th><th>Close Date</th></tr></thead>
+        <tbody id="dealsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PERFORMANCE -->
+<div class="page" id="page-performance">
+  <div class="section">
+    <div class="section-title">Team Performance</div>
+    <div class="grid-4">
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">Team Quota Attainment</div>
+        <div class="kpi-value">91.2%</div>
+        <div class="goal-bar-track"><div class="goal-bar-fill" data-pct="91.2"></div></div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">Calls Made (30d)</div>
+        <div class="kpi-value">3,412</div>
+        <div class="kpi-sub">avg 142/rep</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--pink)">
+        <div class="kpi-label">Meetings Booked</div>
+        <div class="kpi-value">486</div>
+        <div class="kpi-sub">14.2% call-to-meeting</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Top Rep</div>
+        <div class="kpi-value" style="font-size:18px">D. Alvarez</div>
+        <div class="kpi-sub">$214K closed</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Quota Attainment by Rep</div>
+        <div class="chart-box"><canvas id="chartQuota"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Activity Mix (Calls / Emails / Meetings)</div>
+        <div class="chart-box"><canvas id="chartActivity"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Leaderboard</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rank</th><th>Rep</th><th>Closed Revenue</th><th>Deals Won</th><th>Win Rate</th><th>Quota %</th></tr></thead>
+        <tbody id="leaderBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- REVENUE -->
+<div class="page" id="page-revenue">
+  <div class="section">
+    <div class="section-title">Revenue & Commissions</div>
+    <div class="grid-4">
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">MTD Revenue</div>
+        <div class="kpi-value">$487K</div>
+        <div class="kpi-sub" style="color:var(--green)">▲ 12.4% MoM</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">YTD Revenue</div>
+        <div class="kpi-value">$3.92M</div>
+        <div class="kpi-sub">target $5.1M</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Commissions Payable</div>
+        <div class="kpi-value">$61.4K</div>
+        <div class="kpi-sub">this period, 12 reps</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Avg Deal Size</div>
+        <div class="kpi-value">$11.2K</div>
+        <div class="kpi-sub">▲ $640 vs last qtr</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Monthly Revenue (12mo)</div>
+        <div class="chart-box"><canvas id="chartRevenue"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Revenue by Product Line</div>
+        <div class="chart-box"><canvas id="chartProduct"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Commission Payouts</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rep</th><th>Closed Revenue</th><th>Commission Rate</th><th>Commission Owed</th><th>Status</th></tr></thead>
+        <tbody id="commBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNTS -->
+<div class="page" id="page-accounts">
+  <div class="section">
+    <div class="section-title">Client Accounts</div>
+    <div class="grid-4">
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">Active Accounts</div>
+        <div class="kpi-value">164</div>
+        <div class="kpi-sub">+9 this month</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">At-Risk Accounts</div>
+        <div class="kpi-value" style="color:var(--red)">11</div>
+        <div class="kpi-sub">health score &lt; 50</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Renewals Next 30d</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">$142K ARR at stake</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Avg Account Health</div>
+        <div class="kpi-value">76</div>
+        <div class="kpi-sub">/100</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Accounts</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Account</th><th>Owner</th><th>ARR</th><th>Health</th><th>Renewal Date</th><th>Status</th></tr></thead>
+        <tbody id="acctBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+Chart.defaults.color = '#9c9cc0';
+Chart.defaults.font.family = "'Inter',sans-serif";
+Chart.defaults.borderColor = '#23253a';
+
+// --- nav ---
+document.querySelectorAll('.nav-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('page-'+tab.dataset.page).classList.add('active');
+  });
+});
+document.querySelectorAll('.period-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    btn.parentElement.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// --- mock data ---
+const deals = [
+  ['Atlas Manufacturing','Atlas Mfg','D. Alvarez','Negotiation','$84,000','70%','2026-06-28'],
+  ['Northwind Retail Expansion','Northwind','S. Park','Proposal','$46,500','55%','2026-07-02'],
+  ['Brightline Logistics','Brightline','M. Chen','Discovery','$22,000','25%','2026-07-14'],
+  ['Cobalt Health Renewal','Cobalt Health','D. Alvarez','Negotiation','$118,000','80%','2026-06-24'],
+  ['Pinewood Realty','Pinewood','J. Ortiz','Qualified','$31,200','40%','2026-07-09'],
+  ['Vertex Energy','Vertex','S. Park','Proposal','$67,800','60%','2026-06-30'],
+  ['Harbor Foods Co.','Harbor Foods','M. Chen','Closed Won','$28,400','100%','2026-06-15'],
+  ['Lumen Analytics','Lumen','J. Ortiz','Discovery','$15,600','20%','2026-07-21'],
+];
+const stageBadge = {
+  'Negotiation':'badge-violet','Proposal':'badge-cyan','Discovery':'badge-amber',
+  'Qualified':'badge-amber','Closed Won':'badge-green','Closed Lost':'badge-red'
+};
+document.getElementById('dealsBody').innerHTML = deals.map(d=>`
+  <tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td>
+  <td><span class="badge ${stageBadge[d[3]]||'badge-violet'}">${d[3]}</span></td>
+  <td class="mono">${d[4]}</td><td class="mono">${d[5]}</td><td class="mono">${d[6]}</td></tr>
+`).join('');
+
+const reps = [
+  ['D. Alvarez','DA','$214,000',19,'48%',118],
+  ['S. Park','SP','$186,400',17,'41%',104],
+  ['M. Chen','MC','$162,900',15,'39%',96],
+  ['J. Ortiz','JO','$129,300',12,'33%',81],
+  ['R. Singh','RS','$98,600',9,'29%',64],
+];
+document.getElementById('leaderBody').innerHTML = reps.map((r,i)=>`
+  <tr><td><span class="rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span></td>
+  <td><span class="rep-row"><span class="avatar">${r[1]}</span>${r[0]}</span></td>
+  <td class="mono">${r[2]}</td><td class="mono">${r[3]}</td><td class="mono">${r[4]}</td>
+  <td class="mono">${r[5]}%</td></tr>
+`).join('');
+
+const comm = [
+  ['D. Alvarez','$214,000','8%','$17,120','Pending'],
+  ['S. Park','$186,400','8%','$14,912','Pending'],
+  ['M. Chen','$162,900','7%','$11,403','Paid'],
+  ['J. Ortiz','$129,300','7%','$9,051','Paid'],
+  ['R. Singh','$98,600','6%','$5,916','Paid'],
+];
+const commBadge = {'Pending':'badge-amber','Paid':'badge-green'};
+document.getElementById('commBody').innerHTML = comm.map(c=>`
+  <tr><td>${c[0]}</td><td class="mono">${c[1]}</td><td class="mono">${c[2]}</td>
+  <td class="mono">${c[3]}</td><td><span class="badge ${commBadge[c[4]]}">${c[4]}</span></td></tr>
+`).join('');
+
+const accts = [
+  ['Cobalt Health','D. Alvarez','$118,000',82,'2026-09-01','Healthy'],
+  ['Atlas Manufacturing','D. Alvarez','$84,000',74,'2026-08-12','Healthy'],
+  ['Northwind Retail','S. Park','$56,000',44,'2026-07-05','At Risk'],
+  ['Vertex Energy','S. Park','$67,800',61,'2026-10-22','Healthy'],
+  ['Brightline Logistics','M. Chen','$22,000',38,'2026-07-18','At Risk'],
+  ['Pinewood Realty','J. Ortiz','$31,200',69,'2026-11-03','Healthy'],
+];
+const acctBadge = {'Healthy':'badge-green','At Risk':'badge-red'};
+document.getElementById('acctBody').innerHTML = accts.map(a=>`
+  <tr><td>${a[0]}</td><td>${a[1]}</td><td class="mono">${a[2]}</td>
+  <td class="mono">${a[3]}</td><td class="mono">${a[4]}</td>
+  <td><span class="badge ${acctBadge[a[5]]}">${a[5]}</span></td></tr>
+`).join('');
+
+// --- goal bars ---
+requestAnimationFrame(()=>{
+  document.querySelectorAll('.goal-bar-fill').forEach(el=>{
+    el.style.width = el.dataset.pct + '%';
+  });
+});
+
+// --- charts ---
+new Chart(document.getElementById('chartStage'), {
+  type:'bar',
+  data:{
+    labels:['Discovery','Qualified','Proposal','Negotiation','Closed Won'],
+    datasets:[{data:[312000,486000,398000,512000,142000],backgroundColor:['#fbbf24','#fbbf24','#22d3ee','#8b5cf6','#34d399'],borderRadius:6}]
+  },
+  options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
+});
+
+new Chart(document.getElementById('chartFlow'), {
+  type:'line',
+  data:{
+    labels:Array.from({length:12},(_,i)=>'W'+(i+1)),
+    datasets:[
+      {label:'New Deals',data:[12,14,9,16,18,15,20,17,19,22,21,24],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',tension:.35,fill:true},
+      {label:'Closed Won',data:[6,7,5,9,8,10,11,9,12,13,12,15],borderColor:'#34d399',backgroundColor:'rgba(52,211,153,.12)',tension:.35,fill:true},
+    ]
+  },
+  options:{plugins:{legend:{labels:{boxWidth:10}}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
+});
+
+new Chart(document.getElementById('chartQuota'), {
+  type:'bar',
+  data:{
+    labels:reps.map(r=>r[0]),
+    datasets:[{label:'Quota %',data:reps.map(r=>parseFloat(r[5])),backgroundColor:'#8b5cf6',borderRadius:6}]
+  },
+  options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1b1d2c'},max:140},y:{grid:{display:false}}}}
+});
+
+new Chart(document.getElementById('chartActivity'), {
+  type:'doughnut',
+  data:{
+    labels:['Calls','Emails','Meetings'],
+    datasets:[{data:[3412,5890,486],backgroundColor:['#22d3ee','#8b5cf6','#f472b6']}]
+  },
+  options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}},cutout:'65%'}
+});
+
+new Chart(document.getElementById('chartRevenue'), {
+  type:'bar',
+  data:{
+    labels:['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'],
+    datasets:[{label:'Revenue',data:[260,278,295,310,330,360,340,372,390,410,452,487],backgroundColor:'#8b5cf6',borderRadius:6}]
+  },
+  options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'},ticks:{callback:v=>'$'+v+'K'}},x:{grid:{display:false}}}}
+});
+
+new Chart(document.getElementById('chartProduct'), {
+  type:'pie',
+  data:{
+    labels:['Core Platform','Add-ons','Services','Renewals'],
+    datasets:[{data:[42,18,15,25],backgroundColor:['#8b5cf6','#22d3ee','#f472b6','#34d399']}]
+  },
+  options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}
+});
+</script>
+</body>
+</html>
