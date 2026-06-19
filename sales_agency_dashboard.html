@@ -27,19 +27,25 @@ nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg1);border
 .nav-tab:hover{color:var(--text);background:var(--bg3)}
 .nav-tab.active{color:var(--violet);background:rgba(139,92,246,.12)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.period-btns{display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px}
-.period-btn{padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--text2);border:none;background:none;transition:all .15s}
-.period-btn.active{color:var(--text);background:var(--bg4)}
+.sync-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.sync-dot.err{background:var(--red)}
+.sync-dot.loading{background:var(--amber);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.btn{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;border:none;transition:all .15s}
+.btn-violet{background:rgba(139,92,246,.15);color:var(--violet);border:1px solid rgba(139,92,246,.3)}
+.btn-violet:hover{background:rgba(139,92,246,.25)}
 
 main{padding:72px 20px 40px;max-width:1440px;margin:0 auto}
 .page{display:none}.page.active{display:block}
+.banner{background:var(--bg2);border:1px solid rgba(251,191,36,.3);color:var(--amber);border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:16px;display:none}
+.banner.show{display:block}
 
 .section{margin-bottom:28px}
 .section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px}
@@ -49,10 +55,6 @@ main{padding:72px 20px 40px;max-width:1440px;margin:0 auto}
 .kpi-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
 .kpi-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;line-height:1}
 .kpi-sub{font-size:11px;color:var(--text3);margin-top:5px}
-
-.goal-bar-track{height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin:6px 0}
-.goal-bar-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:5px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
-.goal-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
 
 .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse}
@@ -65,18 +67,19 @@ tr:hover td{background:var(--bg3)}
 .badge-cyan{background:rgba(34,211,238,.15);color:var(--cyan)}
 .badge-red{background:rgba(251,113,133,.15);color:var(--red)}
 .badge-violet{background:rgba(139,92,246,.15);color:var(--violet)}
+.badge-grey{background:rgba(156,156,192,.15);color:var(--text2)}
 
 .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0a0b0f;margin-right:8px;vertical-align:middle}
 .rep-row{display:flex;align-items:center}
 .chart-box{position:relative;height:260px}
-.chart-box-sm{position:relative;height:180px}
+.notes-cell{max-width:280px;white-space:normal;color:var(--text2);font-size:12px}
 
 .rank{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--bg4);color:var(--text2)}
 .rank.r1{background:rgba(251,191,36,.2);color:var(--amber)}
 .rank.r2{background:rgba(156,156,192,.2);color:var(--text)}
 .rank.r3{background:rgba(139,92,246,.2);color:var(--violet)}
 
-@media (max-width:1000px){.grid-4,.grid-5,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:1000px){.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -84,70 +87,45 @@ tr:hover td{background:var(--bg3)}
 <nav>
   <div class="brand"><span class="dot"></span>Janier Sales</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" data-page="pipeline">Pipeline</button>
+    <button class="nav-tab active" data-page="pipeline">Funnel</button>
     <button class="nav-tab" data-page="performance">Rep Performance</button>
-    <button class="nav-tab" data-page="revenue">Revenue & Commissions</button>
-    <button class="nav-tab" data-page="accounts">Accounts</button>
+    <button class="nav-tab" data-page="revenue">Revenue & Closes</button>
+    <button class="nav-tab" data-page="accounts">Objections & Notes</button>
   </div>
   <div class="nav-right">
-    <div class="period-btns">
-      <button class="period-btn">7D</button>
-      <button class="period-btn active">30D</button>
-      <button class="period-btn">QTR</button>
-      <button class="period-btn">YTD</button>
-    </div>
-    <span class="mono" style="font-size:11px;color:var(--text3)">SAMPLE DATA</span>
+    <span class="sync-pill"><span class="sync-dot loading" id="syncDot"></span><span id="syncText">Loading sheet…</span></span>
+    <button class="btn btn-violet" id="refreshBtn">Refresh</button>
   </div>
 </nav>
 
 <main>
+<div class="banner" id="errBanner">Couldn't reach the Google Sheet — showing the last data loaded. Click Refresh to retry.</div>
 
-<!-- PIPELINE -->
+<!-- FUNNEL / PIPELINE -->
 <div class="page active" id="page-pipeline">
   <div class="section">
-    <div class="section-title">Pipeline Overview</div>
-    <div class="grid-4">
-      <div class="kpi-card" style="border-top-color:var(--violet)">
-        <div class="kpi-label">Open Pipeline Value</div>
-        <div class="kpi-value">$1.84M</div>
-        <div class="kpi-sub">87 active deals</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--cyan)">
-        <div class="kpi-label">Weighted Forecast</div>
-        <div class="kpi-value">$612K</div>
-        <div class="kpi-sub">probability-adjusted</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--green)">
-        <div class="kpi-label">Win Rate (30d)</div>
-        <div class="kpi-value">38.4%</div>
-        <div class="kpi-sub" style="color:var(--green)">▲ 3.1pt vs prior</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--amber)">
-        <div class="kpi-label">Avg Sales Cycle</div>
-        <div class="kpi-value">22.5 days</div>
-        <div class="kpi-sub">close date - created date</div>
-      </div>
-    </div>
+    <div class="section-title">Funnel Overview</div>
+    <div class="grid-4" id="pipelineKpis"></div>
   </div>
 
   <div class="section">
     <div class="grid-2">
       <div class="card">
-        <div class="section-title">Pipeline by Stage</div>
+        <div class="section-title">Funnel by Stage (Totals)</div>
         <div class="chart-box"><canvas id="chartStage"></canvas></div>
       </div>
       <div class="card">
-        <div class="section-title">New vs Closed (12 weeks)</div>
+        <div class="section-title">Leads Contacted vs Qualified Convos (Daily)</div>
         <div class="chart-box"><canvas id="chartFlow"></canvas></div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Open Deals</div>
+    <div class="section-title">Daily Log</div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Deal</th><th>Account</th><th>Owner</th><th>Stage</th><th>Value</th><th>Prob.</th><th>Close Date</th></tr></thead>
+        <thead><tr><th>Date</th><th>Rep</th><th>Leads Contacted</th><th>Qualified</th><th>Sets</th><th>Booked</th><th>Live Calls</th><th>Closes</th></tr></thead>
         <tbody id="dealsBody"></tbody>
       </table>
     </div>
@@ -157,49 +135,28 @@ tr:hover td{background:var(--bg3)}
 <!-- PERFORMANCE -->
 <div class="page" id="page-performance">
   <div class="section">
-    <div class="section-title">Team Performance</div>
-    <div class="grid-4">
-      <div class="kpi-card" style="border-top-color:var(--violet)">
-        <div class="kpi-label">Team Quota Attainment</div>
-        <div class="kpi-value">91.2%</div>
-        <div class="goal-bar-track"><div class="goal-bar-fill" data-pct="91.2"></div></div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--cyan)">
-        <div class="kpi-label">Calls Made (30d)</div>
-        <div class="kpi-value">3,412</div>
-        <div class="kpi-sub">avg 142/rep</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--pink)">
-        <div class="kpi-label">Meetings Booked</div>
-        <div class="kpi-value">486</div>
-        <div class="kpi-sub">14.2% call-to-meeting</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--green)">
-        <div class="kpi-label">Top Rep</div>
-        <div class="kpi-value" style="font-size:18px">D. Alvarez</div>
-        <div class="kpi-sub">$214K closed</div>
-      </div>
-    </div>
+    <div class="section-title">Rep Performance</div>
+    <div class="grid-4" id="performanceKpis"></div>
   </div>
 
   <div class="section">
     <div class="grid-2">
       <div class="card">
-        <div class="section-title">Quota Attainment by Rep</div>
+        <div class="section-title">Daily Self-Rating (1-10)</div>
         <div class="chart-box"><canvas id="chartQuota"></canvas></div>
       </div>
       <div class="card">
-        <div class="section-title">Activity Mix (Calls / Emails / Meetings)</div>
+        <div class="section-title">Activity Mix (Totals)</div>
         <div class="chart-box"><canvas id="chartActivity"></canvas></div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Leaderboard</div>
+    <div class="section-title">Best Days (ranked by Qualified Convos)</div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Rank</th><th>Rep</th><th>Closed Revenue</th><th>Deals Won</th><th>Win Rate</th><th>Quota %</th></tr></thead>
+        <thead><tr><th>Rank</th><th>Date</th><th>Rep</th><th>Leads Contacted</th><th>Qualified</th><th>Sets</th><th>Rate</th></tr></thead>
         <tbody id="leaderBody"></tbody>
       </table>
     </div>
@@ -209,88 +166,46 @@ tr:hover td{background:var(--bg3)}
 <!-- REVENUE -->
 <div class="page" id="page-revenue">
   <div class="section">
-    <div class="section-title">Revenue & Commissions</div>
-    <div class="grid-4">
-      <div class="kpi-card" style="border-top-color:var(--violet)">
-        <div class="kpi-label">MTD Revenue</div>
-        <div class="kpi-value">$487K</div>
-        <div class="kpi-sub" style="color:var(--green)">▲ 12.4% MoM</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--cyan)">
-        <div class="kpi-label">YTD Revenue</div>
-        <div class="kpi-value">$3.92M</div>
-        <div class="kpi-sub">target $5.1M</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--amber)">
-        <div class="kpi-label">Commissions Payable</div>
-        <div class="kpi-value">$61.4K</div>
-        <div class="kpi-sub">this period, 12 reps</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--green)">
-        <div class="kpi-label">Avg Deal Size</div>
-        <div class="kpi-value">$11.2K</div>
-        <div class="kpi-sub">▲ $640 vs last qtr</div>
-      </div>
-    </div>
+    <div class="section-title">Revenue & Closes</div>
+    <div class="grid-4" id="revenueKpis"></div>
   </div>
 
   <div class="section">
     <div class="grid-2">
       <div class="card">
-        <div class="section-title">Monthly Revenue (12mo)</div>
+        <div class="section-title">Cash Collected by Day</div>
         <div class="chart-box"><canvas id="chartRevenue"></canvas></div>
       </div>
       <div class="card">
-        <div class="section-title">Revenue by Product Line</div>
+        <div class="section-title">Closes vs Downsells</div>
         <div class="chart-box"><canvas id="chartProduct"></canvas></div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Commission Payouts</div>
+    <div class="section-title">Close Log</div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Rep</th><th>Closed Revenue</th><th>Commission Rate</th><th>Commission Owed</th><th>Status</th></tr></thead>
+        <thead><tr><th>Date</th><th>Rep</th><th>Closes</th><th>Downsells</th><th>Cash Collected</th><th>Total Revenue</th></tr></thead>
         <tbody id="commBody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ACCOUNTS -->
+<!-- OBJECTIONS / NOTES -->
 <div class="page" id="page-accounts">
   <div class="section">
-    <div class="section-title">Client Accounts</div>
-    <div class="grid-4">
-      <div class="kpi-card" style="border-top-color:var(--violet)">
-        <div class="kpi-label">Active Accounts</div>
-        <div class="kpi-value">164</div>
-        <div class="kpi-sub">+9 this month</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--cyan)">
-        <div class="kpi-label">At-Risk Accounts</div>
-        <div class="kpi-value" style="color:var(--red)">11</div>
-        <div class="kpi-sub">health score &lt; 50</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--amber)">
-        <div class="kpi-label">Renewals Next 30d</div>
-        <div class="kpi-value">8</div>
-        <div class="kpi-sub">$142K ARR at stake</div>
-      </div>
-      <div class="kpi-card" style="border-top-color:var(--green)">
-        <div class="kpi-label">Avg Account Health</div>
-        <div class="kpi-value">76</div>
-        <div class="kpi-sub">/100</div>
-      </div>
-    </div>
+    <div class="section-title">Objections & Notes</div>
+    <div class="grid-3" id="accountsKpis"></div>
   </div>
 
   <div class="section">
-    <div class="section-title">Accounts</div>
+    <div class="section-title">Activity Log</div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Account</th><th>Owner</th><th>ARR</th><th>Health</th><th>Renewal Date</th><th>Status</th></tr></thead>
+        <thead><tr><th>Date</th><th>Rep</th><th>Objection</th><th>Notes</th></tr></thead>
         <tbody id="acctBody"></tbody>
       </table>
     </div>
@@ -304,6 +219,9 @@ Chart.defaults.color = '#9c9cc0';
 Chart.defaults.font.family = "'Inter',sans-serif";
 Chart.defaults.borderColor = '#23253a';
 
+const SHEET_ID = '1jidKABEl5hVeu_Iwlqn5oKm1cfBSyvAnPhx9UF04fCk';
+const GID = '0';
+
 // --- nav ---
 document.querySelectorAll('.nav-tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
@@ -313,140 +231,280 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     document.getElementById('page-'+tab.dataset.page).classList.add('active');
   });
 });
-document.querySelectorAll('.period-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    btn.parentElement.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
 
-// --- mock data ---
-const deals = [
-  ['Atlas Manufacturing','Atlas Mfg','D. Alvarez','Negotiation','$84,000','70%','2026-06-28'],
-  ['Northwind Retail Expansion','Northwind','S. Park','Proposal','$46,500','55%','2026-07-02'],
-  ['Brightline Logistics','Brightline','M. Chen','Discovery','$22,000','25%','2026-07-14'],
-  ['Cobalt Health Renewal','Cobalt Health','D. Alvarez','Negotiation','$118,000','80%','2026-06-24'],
-  ['Pinewood Realty','Pinewood','J. Ortiz','Qualified','$31,200','40%','2026-07-09'],
-  ['Vertex Energy','Vertex','S. Park','Proposal','$67,800','60%','2026-06-30'],
-  ['Harbor Foods Co.','Harbor Foods','M. Chen','Closed Won','$28,400','100%','2026-06-15'],
-  ['Lumen Analytics','Lumen','J. Ortiz','Discovery','$15,600','20%','2026-07-21'],
-];
-const stageBadge = {
-  'Negotiation':'badge-violet','Proposal':'badge-cyan','Discovery':'badge-amber',
-  'Qualified':'badge-amber','Closed Won':'badge-green','Closed Lost':'badge-red'
+let charts = {};
+function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts = {}; }
+
+function fmtMoney(n){ return '$' + Math.round(n).toLocaleString(); }
+function fmtPct(n){ return (Math.round(n*10)/10) + '%'; }
+
+function objectionBadge(v){
+  const m = {'Money':'badge-red','Other':'badge-amber','None':'badge-grey'};
+  return m[v] || 'badge-grey';
+}
+
+function render(rows){
+  // rows: {name,date,leadsContacted,qualified,sets,booked,live,closes,downsells,cash,totalRevenue,rate,objection,notes}
+  rows.sort((a,b)=> a.date - b.date);
+
+  const sum = key => rows.reduce((s,r)=>s+r[key],0);
+  const totalLeads = sum('leadsContacted');
+  const totalQualified = sum('qualified');
+  const totalSets = sum('sets');
+  const totalBooked = sum('booked');
+  const totalLive = sum('live');
+  const totalCloses = sum('closes');
+  const totalDownsells = sum('downsells');
+  const totalCash = sum('cash');
+  const totalRevenue = sum('totalRevenue');
+  const avgRate = rows.length ? (sum('rate')/rows.length) : 0;
+  const setRate = totalLeads ? (totalSets/totalLeads*100) : 0;
+  const showRate = totalBooked ? (totalLive/totalBooked*100) : 0;
+  const closeRate = totalLive ? (totalCloses/totalLive*100) : 0;
+
+  // ---------- PIPELINE / FUNNEL ----------
+  document.getElementById('pipelineKpis').innerHTML = `
+    <div class="kpi-card" style="border-top-color:var(--violet)">
+      <div class="kpi-label">Leads Contacted</div>
+      <div class="kpi-value">${totalLeads.toLocaleString()}</div>
+      <div class="kpi-sub">${rows.length} logged days</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--cyan)">
+      <div class="kpi-label">Qualified Convos</div>
+      <div class="kpi-value">${totalQualified.toLocaleString()}</div>
+      <div class="kpi-sub">${fmtPct(totalLeads?totalQualified/totalLeads*100:0)} of contacted</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--green)">
+      <div class="kpi-label">Set Rate</div>
+      <div class="kpi-value">${fmtPct(setRate)}</div>
+      <div class="kpi-sub">${totalSets} sets / ${totalLeads} contacted</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--amber)">
+      <div class="kpi-label">Show Rate</div>
+      <div class="kpi-value">${fmtPct(showRate)}</div>
+      <div class="kpi-sub">${totalLive} live / ${totalBooked} booked</div>
+    </div>
+  `;
+
+  document.getElementById('dealsBody').innerHTML = rows.slice().reverse().map(r=>`
+    <tr><td class="mono">${r.dateStr}</td><td>${r.name}</td>
+    <td class="mono">${r.leadsContacted}</td><td class="mono">${r.qualified}</td>
+    <td class="mono">${r.sets}</td><td class="mono">${r.booked}</td>
+    <td class="mono">${r.live}</td><td class="mono">${r.closes}</td></tr>
+  `).join('');
+
+  charts.stage = new Chart(document.getElementById('chartStage'), {
+    type:'bar',
+    data:{
+      labels:['Contacted','Qualified','Sets','Booked','Live Calls','Closes'],
+      datasets:[{data:[totalLeads,totalQualified,totalSets,totalBooked,totalLive,totalCloses],
+        backgroundColor:['#8b5cf6','#a78bfa','#22d3ee','#fbbf24','#f472b6','#34d399'],borderRadius:6}]
+    },
+    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
+  });
+
+  charts.flow = new Chart(document.getElementById('chartFlow'), {
+    type:'line',
+    data:{
+      labels:rows.map(r=>r.dateStr),
+      datasets:[
+        {label:'Leads Contacted',data:rows.map(r=>r.leadsContacted),borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',tension:.35,fill:true},
+        {label:'Qualified Convos',data:rows.map(r=>r.qualified),borderColor:'#22d3ee',backgroundColor:'rgba(34,211,238,.12)',tension:.35,fill:true},
+      ]
+    },
+    options:{plugins:{legend:{labels:{boxWidth:10}}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
+  });
+
+  // ---------- PERFORMANCE ----------
+  const bestRate = rows.reduce((m,r)=>Math.max(m,r.rate),0);
+  const bestDay = rows.slice().sort((a,b)=>b.qualified-a.qualified)[0];
+
+  document.getElementById('performanceKpis').innerHTML = `
+    <div class="kpi-card" style="border-top-color:var(--violet)">
+      <div class="kpi-label">Avg Self-Rating</div>
+      <div class="kpi-value">${avgRate.toFixed(1)}/10</div>
+      <div class="kpi-sub">across ${rows.length} days</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--cyan)">
+      <div class="kpi-label">Total Closes</div>
+      <div class="kpi-value">${totalCloses}</div>
+      <div class="kpi-sub">${fmtPct(closeRate)} of live calls</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--pink)">
+      <div class="kpi-label">Downsells</div>
+      <div class="kpi-value">${totalDownsells}</div>
+      <div class="kpi-sub">secondary offer closes</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--green)">
+      <div class="kpi-label">Best Day</div>
+      <div class="kpi-value" style="font-size:18px">${bestDay ? bestDay.dateStr : '—'}</div>
+      <div class="kpi-sub">${bestDay ? bestDay.qualified+' qualified convos' : ''}</div>
+    </div>
+  `;
+
+  charts.quota = new Chart(document.getElementById('chartQuota'), {
+    type:'line',
+    data:{labels:rows.map(r=>r.dateStr),datasets:[{label:'Rate',data:rows.map(r=>r.rate),borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',tension:.3,fill:true}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'},min:0,max:10},x:{grid:{display:false}}}}
+  });
+
+  charts.activity = new Chart(document.getElementById('chartActivity'), {
+    type:'doughnut',
+    data:{labels:['Leads Contacted','Qualified Convos','Sets'],datasets:[{data:[totalLeads,totalQualified,totalSets],backgroundColor:['#8b5cf6','#22d3ee','#f472b6']}]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}},cutout:'65%'}
+  });
+
+  const ranked = rows.slice().sort((a,b)=>b.qualified-a.qualified).slice(0,8);
+  document.getElementById('leaderBody').innerHTML = ranked.map((r,i)=>`
+    <tr><td><span class="rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span></td>
+    <td class="mono">${r.dateStr}</td>
+    <td><span class="rep-row"><span class="avatar">${r.name.slice(0,2).toUpperCase()}</span>${r.name}</span></td>
+    <td class="mono">${r.leadsContacted}</td><td class="mono">${r.qualified}</td><td class="mono">${r.sets}</td><td class="mono">${r.rate}/10</td></tr>
+  `).join('');
+
+  // ---------- REVENUE ----------
+  const avgDeal = totalCloses ? (totalCash/totalCloses) : 0;
+  document.getElementById('revenueKpis').innerHTML = `
+    <div class="kpi-card" style="border-top-color:var(--violet)">
+      <div class="kpi-label">Cash Collected</div>
+      <div class="kpi-value">${fmtMoney(totalCash)}</div>
+      <div class="kpi-sub">period to date</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--cyan)">
+      <div class="kpi-label">Total Revenue Logged</div>
+      <div class="kpi-value">${fmtMoney(totalRevenue)}</div>
+      <div class="kpi-sub">contract value</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--amber)">
+      <div class="kpi-label">Total Closes</div>
+      <div class="kpi-value">${totalCloses}</div>
+      <div class="kpi-sub">+ ${totalDownsells} downsells</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--green)">
+      <div class="kpi-label">Avg Cash / Close</div>
+      <div class="kpi-value">${fmtMoney(avgDeal)}</div>
+      <div class="kpi-sub">cash collected basis</div>
+    </div>
+  `;
+
+  charts.revenue = new Chart(document.getElementById('chartRevenue'), {
+    type:'bar',
+    data:{labels:rows.map(r=>r.dateStr),datasets:[{label:'Cash Collected',data:rows.map(r=>r.cash),backgroundColor:'#8b5cf6',borderRadius:6}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'},ticks:{callback:v=>'$'+v}},x:{grid:{display:false}}}}
+  });
+
+  charts.product = new Chart(document.getElementById('chartProduct'), {
+    type:'pie',
+    data:{labels:['Closes','Downsells'],datasets:[{data:[totalCloses,totalDownsells],backgroundColor:['#8b5cf6','#f472b6']}]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}
+  });
+
+  document.getElementById('commBody').innerHTML = rows.slice().reverse().filter(r=>r.closes>0||r.downsells>0||r.cash>0).map(r=>`
+    <tr><td class="mono">${r.dateStr}</td><td>${r.name}</td><td class="mono">${r.closes}</td>
+    <td class="mono">${r.downsells}</td><td class="mono">${fmtMoney(r.cash)}</td><td class="mono">${fmtMoney(r.totalRevenue)}</td></tr>
+  `).join('') || '<tr><td colspan="6" style="color:var(--text3)">No closes logged yet</td></tr>';
+
+  // ---------- OBJECTIONS / NOTES ----------
+  const objCounts = {};
+  rows.forEach(r=>{ objCounts[r.objection] = (objCounts[r.objection]||0)+1; });
+  const topObjection = Object.entries(objCounts).sort((a,b)=>b[1]-a[1])[0];
+  const noteworthy = rows.filter(r=>r.notes && r.notes.toLowerCase()!=='none').length;
+
+  document.getElementById('accountsKpis').innerHTML = `
+    <div class="kpi-card" style="border-top-color:var(--violet)">
+      <div class="kpi-label">Days Logged</div>
+      <div class="kpi-value">${rows.length}</div>
+      <div class="kpi-sub">${rows[0]?rows[0].dateStr:''} → ${rows[rows.length-1]?rows[rows.length-1].dateStr:''}</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--amber)">
+      <div class="kpi-label">Top Objection</div>
+      <div class="kpi-value" style="font-size:18px">${topObjection?topObjection[0]:'—'}</div>
+      <div class="kpi-sub">${topObjection?topObjection[1]+' days logged':''}</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--green)">
+      <div class="kpi-label">Days With Notes</div>
+      <div class="kpi-value">${noteworthy}</div>
+      <div class="kpi-sub">of ${rows.length} logged days</div>
+    </div>
+  `;
+
+  document.getElementById('acctBody').innerHTML = rows.slice().reverse().map(r=>`
+    <tr><td class="mono">${r.dateStr}</td><td>${r.name}</td>
+    <td><span class="badge ${objectionBadge(r.objection)}">${r.objection}</span></td>
+    <td class="notes-cell">${r.notes}</td></tr>
+  `).join('');
+}
+
+function setSync(state, text){
+  const dot = document.getElementById('syncDot');
+  dot.classList.remove('loading','err');
+  if(state==='loading') dot.classList.add('loading');
+  if(state==='err') dot.classList.add('err');
+  document.getElementById('syncText').textContent = text;
+  document.getElementById('errBanner').classList.toggle('show', state==='err');
+}
+
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+window.__onSheetData = function(json){
+  try{
+    const table = json.table;
+    const rows = table.rows.map(r=>{
+      const c = r.c;
+      const v = i => c[i] ? c[i].v : null;
+      let dateObj = new Date();
+      const rawDate = v(1);
+      if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
+        const parts = rawDate.slice(5,-1).split(',').map(Number);
+        dateObj = new Date(parts[0], parts[1], parts[2]);
+      }
+      return {
+        name: v(0) || 'Unknown',
+        date: dateObj,
+        dateStr: (MONTHS[dateObj.getMonth()]||'') + ' ' + dateObj.getDate(),
+        leadsContacted: v(2)||0,
+        qualified: v(3)||0,
+        sets: v(4)||0,
+        booked: v(5)||0,
+        live: v(6)||0,
+        closes: v(7)||0,
+        downsells: v(8)||0,
+        cash: v(9)||0,
+        totalRevenue: v(10)||0,
+        rate: v(11)||0,
+        objection: v(12) || 'None',
+        notes: v(13) || 'None',
+      };
+    }).filter(r => r.name && r.name !== 'Unknown' || r.leadsContacted);
+    destroyCharts();
+    render(rows);
+    setSync('ok', 'Synced ' + new Date().toLocaleTimeString());
+  }catch(e){
+    console.error(e);
+    setSync('err', 'Parse error');
+  }
 };
-document.getElementById('dealsBody').innerHTML = deals.map(d=>`
-  <tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td>
-  <td><span class="badge ${stageBadge[d[3]]||'badge-violet'}">${d[3]}</span></td>
-  <td class="mono">${d[4]}</td><td class="mono">${d[5]}</td><td class="mono">${d[6]}</td></tr>
-`).join('');
 
-const reps = [
-  ['D. Alvarez','DA','$214,000',19,'48%',118],
-  ['S. Park','SP','$186,400',17,'41%',104],
-  ['M. Chen','MC','$162,900',15,'39%',96],
-  ['J. Ortiz','JO','$129,300',12,'33%',81],
-  ['R. Singh','RS','$98,600',9,'29%',64],
-];
-document.getElementById('leaderBody').innerHTML = reps.map((r,i)=>`
-  <tr><td><span class="rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span></td>
-  <td><span class="rep-row"><span class="avatar">${r[1]}</span>${r[0]}</span></td>
-  <td class="mono">${r[2]}</td><td class="mono">${r[3]}</td><td class="mono">${r[4]}</td>
-  <td class="mono">${r[5]}%</td></tr>
-`).join('');
+function loadSheet(){
+  setSync('loading', 'Loading sheet…');
+  const existing = document.getElementById('sheetScript');
+  if (existing) existing.remove();
+  const script = document.createElement('script');
+  script.id = 'sheetScript';
+  const cb = '__onSheetData';
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${cb}&gid=${GID}&t=${Date.now()}`;
+  script.src = url;
+  script.onerror = () => setSync('err', 'Could not reach sheet');
+  document.body.appendChild(script);
+  setTimeout(() => {
+    if (document.getElementById('syncText').textContent === 'Loading sheet…') {
+      setSync('err', 'Timed out reaching sheet');
+    }
+  }, 8000);
+}
 
-const comm = [
-  ['D. Alvarez','$214,000','8%','$17,120','Pending'],
-  ['S. Park','$186,400','8%','$14,912','Pending'],
-  ['M. Chen','$162,900','7%','$11,403','Paid'],
-  ['J. Ortiz','$129,300','7%','$9,051','Paid'],
-  ['R. Singh','$98,600','6%','$5,916','Paid'],
-];
-const commBadge = {'Pending':'badge-amber','Paid':'badge-green'};
-document.getElementById('commBody').innerHTML = comm.map(c=>`
-  <tr><td>${c[0]}</td><td class="mono">${c[1]}</td><td class="mono">${c[2]}</td>
-  <td class="mono">${c[3]}</td><td><span class="badge ${commBadge[c[4]]}">${c[4]}</span></td></tr>
-`).join('');
-
-const accts = [
-  ['Cobalt Health','D. Alvarez','$118,000',82,'2026-09-01','Healthy'],
-  ['Atlas Manufacturing','D. Alvarez','$84,000',74,'2026-08-12','Healthy'],
-  ['Northwind Retail','S. Park','$56,000',44,'2026-07-05','At Risk'],
-  ['Vertex Energy','S. Park','$67,800',61,'2026-10-22','Healthy'],
-  ['Brightline Logistics','M. Chen','$22,000',38,'2026-07-18','At Risk'],
-  ['Pinewood Realty','J. Ortiz','$31,200',69,'2026-11-03','Healthy'],
-];
-const acctBadge = {'Healthy':'badge-green','At Risk':'badge-red'};
-document.getElementById('acctBody').innerHTML = accts.map(a=>`
-  <tr><td>${a[0]}</td><td>${a[1]}</td><td class="mono">${a[2]}</td>
-  <td class="mono">${a[3]}</td><td class="mono">${a[4]}</td>
-  <td><span class="badge ${acctBadge[a[5]]}">${a[5]}</span></td></tr>
-`).join('');
-
-// --- goal bars ---
-requestAnimationFrame(()=>{
-  document.querySelectorAll('.goal-bar-fill').forEach(el=>{
-    el.style.width = el.dataset.pct + '%';
-  });
-});
-
-// --- charts ---
-new Chart(document.getElementById('chartStage'), {
-  type:'bar',
-  data:{
-    labels:['Discovery','Qualified','Proposal','Negotiation','Closed Won'],
-    datasets:[{data:[312000,486000,398000,512000,142000],backgroundColor:['#fbbf24','#fbbf24','#22d3ee','#8b5cf6','#34d399'],borderRadius:6}]
-  },
-  options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
-});
-
-new Chart(document.getElementById('chartFlow'), {
-  type:'line',
-  data:{
-    labels:Array.from({length:12},(_,i)=>'W'+(i+1)),
-    datasets:[
-      {label:'New Deals',data:[12,14,9,16,18,15,20,17,19,22,21,24],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',tension:.35,fill:true},
-      {label:'Closed Won',data:[6,7,5,9,8,10,11,9,12,13,12,15],borderColor:'#34d399',backgroundColor:'rgba(52,211,153,.12)',tension:.35,fill:true},
-    ]
-  },
-  options:{plugins:{legend:{labels:{boxWidth:10}}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
-});
-
-new Chart(document.getElementById('chartQuota'), {
-  type:'bar',
-  data:{
-    labels:reps.map(r=>r[0]),
-    datasets:[{label:'Quota %',data:reps.map(r=>parseFloat(r[5])),backgroundColor:'#8b5cf6',borderRadius:6}]
-  },
-  options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1b1d2c'},max:140},y:{grid:{display:false}}}}
-});
-
-new Chart(document.getElementById('chartActivity'), {
-  type:'doughnut',
-  data:{
-    labels:['Calls','Emails','Meetings'],
-    datasets:[{data:[3412,5890,486],backgroundColor:['#22d3ee','#8b5cf6','#f472b6']}]
-  },
-  options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}},cutout:'65%'}
-});
-
-new Chart(document.getElementById('chartRevenue'), {
-  type:'bar',
-  data:{
-    labels:['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'],
-    datasets:[{label:'Revenue',data:[260,278,295,310,330,360,340,372,390,410,452,487],backgroundColor:'#8b5cf6',borderRadius:6}]
-  },
-  options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'},ticks:{callback:v=>'$'+v+'K'}},x:{grid:{display:false}}}}
-});
-
-new Chart(document.getElementById('chartProduct'), {
-  type:'pie',
-  data:{
-    labels:['Core Platform','Add-ons','Services','Renewals'],
-    datasets:[{data:[42,18,15,25],backgroundColor:['#8b5cf6','#22d3ee','#f472b6','#34d399']}]
-  },
-  options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}
-});
+document.getElementById('refreshBtn').addEventListener('click', loadSheet);
+loadSheet();
 </script>
 </body>
 </html>
