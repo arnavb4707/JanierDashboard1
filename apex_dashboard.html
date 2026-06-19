@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Trading — Sales Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg0:#07070a; --bg1:#0d0d12; --bg2:#111118; --bg3:#16161e; --bg4:#1c1c26;
+  --border:#1e1e2a; --border2:#26263a;
+  --green:#22c55e; --teal:#06b6d4; --blue:#3b82f6;
+  --amber:#f59e0b; --red:#ef4444; --purple:#a855f7; --orange:#f97316;
+  --text:#e8e8f0; --text2:#9898b0; --text3:#5a5a78;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg0);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:0.5px;white-space:nowrap;margin-right:8px}
+.pulse{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}50%{box-shadow:0 0 0 5px rgba(34,197,94,0)}}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);border:none;background:none;transition:all .15s}
+.nav-tab:hover{color:var(--text);background:var(--bg3)}
+.nav-tab.active{color:var(--green);background:rgba(34,197,94,.1)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.period-btns{display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px}
+.period-btn{padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--text2);border:none;background:none;transition:all .15s}
+.period-btn.active{color:var(--text);background:var(--bg4)}
+.sync-info{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.btn{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;border:none;transition:all .15s}
+.btn-green{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.btn-green:hover{background:rgba(34,197,94,.25)}
+
+/* MAIN */
+main{padding:72px 20px 40px;max-width:1400px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+
+/* SECTION */
+.section{margin-bottom:28px}
+.section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+
+/* KPI GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card:hover{border-color:var(--border2)}
+.kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;border-top-width:2px;transition:all .15s}
+.kpi-card:hover{background:var(--bg3)}
+.kpi-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;line-height:1}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:5px}
+
+/* GOAL BAR */
+.goal-bar-wrap{margin-top:14px}
+.goal-bar-track{height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin:6px 0}
+.goal-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--teal));border-radius:5px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.goal-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--border);font-size:13px;white-space:nowrap}
+tr:hover td{background:var(--bg3)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-amber{background:rgba(245,158,11,.15);color:var(--amber)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+.badge-gray{background:rgba(100,100,130,.15);color:var(--text2)}
+
+/* CHART CARD */
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px}
+.chart-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:14px}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap-sm{position:relative;height:160px}
+.chart-wrap-lg{position:relative;height:280px}
+
+/* PILL TOGGLE */
+.pill-toggle{display:flex;background:var(--bg3);border-radius:8px;padding:2px;width:fit-content;margin-bottom:20px}
+.pill-btn{padding:6px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);border:none;background:none;transition:all .15s}
+.pill-btn.active{color:var(--text);background:var(--bg4)}
+
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:all .15s}
+.lb-row:hover{border-color:var(--border2);background:var(--bg3)}
+.lb-rank{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;width:32px;text-align:center}
+.lb-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+.lb-info{flex:1}
+.lb-name{font-weight:600;font-size:15px}
+.lb-role{font-size:11px;color:var(--text2);margin-top:2px}
+.lb-stats{display:flex;gap:24px}
+.lb-stat{text-align:right}
+.lb-stat-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+.lb-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+/* FUNNEL */
+.funnel-step{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.funnel-bar-wrap{flex:1;height:28px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative}
+.funnel-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;transition:width .6s ease}
+.funnel-label{width:90px;font-size:12px;color:var(--text2);text-align:right}
+.funnel-pct{width:42px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;text-align:right}
+
+/* FORECAST */
+.what-need-table{width:100%}
+.what-need-table td{padding:8px 0;border-top:1px solid var(--border);font-size:13px}
+.what-need-table td:first-child{color:var(--text2)}
+.what-need-table td:last-child{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right}
+
+/* SYNC PAGE */
+.setup-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:20px}
+.setup-card h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.setup-card p{color:var(--text2);font-size:13px;line-height:1.6;margin-bottom:12px}
+input[type=text]{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);width:100%;font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .15s}
+input[type=text]:focus{border-color:var(--green)}
+.code-block{background:var(--bg0);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text2);white-space:pre;overflow-x:auto;line-height:1.6;margin:12px 0}
+.step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.step-num{width:24px;height:24px;background:rgba(34,197,94,.15);color:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.filter-bar input,.filter-bar select{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);outline:none}
+.filter-bar select{cursor:pointer}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;gap:6px;margin-top:14px;justify-content:center}
+.page-btn{padding:5px 10px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--text2);border:1px solid var(--border);background:var(--bg3);transition:all .15s}
+.page-btn:hover,.page-btn.active{color:var(--text);border-color:var(--green);color:var(--green)}
+
+/* MISC */
+.text-green{color:var(--green)}.text-teal{color:var(--teal)}.text-amber{color:var(--amber)}
+.text-red{color:var(--red)}.text-blue{color:var(--blue)}.text-purple{color:var(--purple)}
+.gap-12{gap:12px}
+.layout-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.layout-3col{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="brand">
+    <div class="pulse"></div>
+    APEX TRADING
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('overview')">Overview</button>
+    <button class="nav-tab" onclick="showPage('setters')">Setters</button>
+    <button class="nav-tab" onclick="showPage('calllog')">Call Log</button>
+    <button class="nav-tab" onclick="showPage('forecast')">Forecast</button>
+    <button class="nav-tab" onclick="showPage('sync')">⚙ Sync</button>
+  </div>
+  <div class="nav-right">
+    <div class="period-btns">
+      <button class="period-btn" onclick="setPeriod('week')">Week</button>
+      <button class="period-btn" onclick="setPeriod('month')">Month</button>
+      <button class="period-btn active" onclick="setPeriod('all')">All</button>
+    </div>
+    <div class="sync-info" id="syncTime">No sync yet</div>
+    <button class="btn btn-green" id="syncBtn" onclick="syncData()">↻ Sync Sheet</button>
+  </div>
+</nav>
+
+<main>
+<!-- PAGE: OVERVIEW -->
+<div class="page active" id="page-overview">
+  <div class="section">
+    <div class="section-title">Cash Breakdown</div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Total Revenue Generated</div>
+        <div class="kpi-value text-green mono" id="ov-rev">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--teal)">
+        <div class="kpi-label">Total Cash Collected</div>
+        <div class="kpi-value text-teal mono" id="ov-cash">$0</div>
+      </div>
+    </div>
+    <div class="grid-4" style="margin-bottom:14px">
+      <div class="kpi-card" style="border-top-color:var(--blue)">
+        <div class="kpi-label">Cash After Fees (3%)</div>
+        <div class="kpi-value text-blue mono" id="ov-afterfees">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Cash To Be Collected</div>
+        <div class="kpi-value text-amber mono" id="ov-pending">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--purple)">
+        <div class="kpi-label">Cash Per Call Taken</div>
+        <div class="kpi-value text-purple mono" id="ov-percall">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Avg Order Value</div>
+        <div class="kpi-value text-green mono" id="ov-aov">$0</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;font-weight:600">Monthly Cash Goal — <span class="text-green">$50,000</span></div>
+        <div class="mono" style="font-size:13px" id="ov-goal-pct">0%</div>
+      </div>
+      <div class="goal-bar-wrap">
+        <div class="goal-bar-track"><div class="goal-bar-fill" id="goalBar"></div></div>
+        <div class="goal-bar-labels">
+          <span id="ov-cash-label">$0 collected</span>
+          <span id="ov-pace-note" style="color:var(--amber)">—</span>
+          <span>$50,000 goal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Sales Breakdown</div>
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="kpi-card" style="border-top-color:var(--teal)">
+        <div class="kpi-label">Total Live Calls</div>
+        <div class="kpi-value text-teal mono" id="ov-live">0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Closed Calls</div>
+        <div class="kpi-value text-green mono" id="ov-closes">0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--red)">
+        <div class="kpi-label">No Shows</div>
+        <div class="kpi-value text-red mono" id="ov-noshows">0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Deposits</div>
+        <div class="kpi-value text-amber mono" id="ov-deposits">0</div>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Close Rate</div>
+        <div class="kpi-value text-green mono" id="ov-cr">0%</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--blue)">
+        <div class="kpi-label">Show Rate</div>
+        <div class="kpi-value text-blue mono" id="ov-sr">0%</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--red)">
+        <div class="kpi-label">No-Show Rate</div>
+        <div class="kpi-value text-red mono" id="ov-nsr">0%</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--orange)">
+        <div class="kpi-label">No Closes</div>
+        <div class="kpi-value text-orange mono" id="ov-noclose">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Pipeline</div>
+    <div class="layout-2col">
+      <div class="chart-card">
+        <div class="chart-title">Cash Collected by Date</div>
+        <div class="chart-wrap"><canvas id="chartCashDate"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Call Outcomes</div>
+        <div class="chart-wrap"><canvas id="chartOutcomes"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: SETTERS -->
+<div class="page" id="page-setters">
+  <div class="section">
+    <div class="section-title">Leaderboard</div>
+    <div id="leaderboard"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Individual Breakdown</div>
+    <div class="pill-toggle">
+      <button class="pill-btn active" onclick="setSetterView('john')">John</button>
+      <button class="pill-btn" onclick="setSetterView('prabh')">Prabh</button>
+    </div>
+    <div id="setter-stats"></div>
+    <div class="layout-3col" style="margin-top:20px">
+      <div>
+        <div class="section-title" style="margin-bottom:8px">Daily Activity</div>
+        <div class="table-wrap" id="setter-table"></div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:8px">Conversion Funnel</div>
+        <div class="card" id="setter-funnel"></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-top:14px">
+      <div class="chart-title">Sets Per Day</div>
+      <div class="chart-wrap-sm"><canvas id="chartSetsDay"></canvas></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Setter Comparison</div>
+    <div class="chart-card">
+      <div class="chart-wrap-lg"><canvas id="chartSetterComp"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: CALL LOG -->
+<div class="page" id="page-calllog">
+  <div class="section">
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Filtered Revenue</div>
+        <div class="kpi-value text-green mono" id="cl-rev">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--teal)">
+        <div class="kpi-label">Filtered Cash</div>
+        <div class="kpi-value text-teal mono" id="cl-cash">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--purple)">
+        <div class="kpi-label">Close Rate</div>
+        <div class="kpi-value text-purple mono" id="cl-cr">0%</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="cl-search" placeholder="Search email, status, notes…" oninput="renderCallLog()" style="flex:1">
+      <select id="cl-status" onchange="renderCallLog()">
+        <option value="">All Statuses</option>
+        <option>Closed</option>
+        <option>Deposit</option>
+        <option>Follow Up</option>
+        <option>No Show</option>
+        <option>Lost</option>
+        <option>Bad Fit</option>
+        <option>DQ</option>
+        <option>IGNORE</option>
+        <option>Cancelled</option>
+      </select>
+      <select id="cl-sort" onchange="renderCallLog()">
+        <option value="date-desc">Date ↓</option>
+        <option value="date-asc">Date ↑</option>
+        <option value="cash-desc">Cash ↓</option>
+        <option value="cash-asc">Cash ↑</option>
+      </select>
+    </div>
+    <div class="table-wrap" id="calllog-table"></div>
+    <div class="pagination" id="cl-pagination"></div>
+  </div>
+</div>
+
+<!-- PAGE: FORECAST -->
+<div class="page" id="page-forecast">
+  <div class="section">
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="kpi-card" style="border-top-color:var(--teal)">
+        <div class="kpi-label">Cash Collected</div>
+        <div class="kpi-value text-teal mono" id="fc-cash">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Still Needed</div>
+        <div class="kpi-value text-amber mono" id="fc-need">$50,000</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--blue)">
+        <div class="kpi-label">Daily Rate Needed</div>
+        <div class="kpi-value text-blue mono" id="fc-rate">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)" id="fc-proj-card">
+        <div class="kpi-label">Projected at Pace</div>
+        <div class="kpi-value mono" id="fc-proj">$0</div>
+      </div>
+    </div>
+    <div class="layout-2col">
+      <div class="chart-card">
+        <div class="chart-title">Cumulative Cash vs Goal Pace</div>
+        <div class="chart-wrap-lg"><canvas id="chartCumulative"></canvas></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="chart-title" style="margin-bottom:12px">What You Need</div>
+          <table class="what-need-table">
+            <tr><td>Days Left</td><td id="fc-days-left">—</td></tr>
+            <tr><td>Avg Deal Size</td><td id="fc-deal">—</td></tr>
+            <tr><td>Current Close Rate</td><td id="fc-cr">—</td></tr>
+            <tr><td>Current Show Rate</td><td id="fc-show">—</td></tr>
+            <tr><td>Closes Needed</td><td id="fc-closes-need">—</td></tr>
+            <tr><td>Calls Needed</td><td id="fc-calls-need">—</td></tr>
+            <tr><td>Sets Needed</td><td id="fc-sets-need">—</td></tr>
+            <tr><td>vs Expected Pace</td><td id="fc-vs-pace">—</td></tr>
+          </table>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Revenue vs Cash by Close</div>
+          <div class="chart-wrap-sm"><canvas id="chartRevCash"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:24px;margin-bottom:10px">Daily Performance Log</div>
+    <div class="table-wrap" id="fc-log-table"></div>
+  </div>
+</div>
+
+<!-- PAGE: SYNC SETUP -->
+<div class="page" id="page-sync">
+  <div class="setup-card">
+    <h3>Google Sheets Sync</h3>
+    <p>Enter your Apps Script Web App URL to sync live data from your Google Sheet. Data is cached locally so the dashboard works offline.</p>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/..." onchange="saveScriptUrl()">
+      <button class="btn btn-green" onclick="testConnection()" style="white-space:nowrap">Test Connection</button>
+    </div>
+    <div id="testResult" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
+  </div>
+
+  <div class="setup-card">
+    <h3>Setup Guide</h3>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>Open your Google Sheet → Extensions → Apps Script. Paste the code below and save:</div>
+    </div>
+    <pre class="code-block">function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const result = { john: [], prabh: [], calls: [] };
+
+  const s1 = ss.getSheets()[0];
+  const d1 = s1.getDataRange().getValues();
+  for (let i = 1; i &lt; d1.length; i++) {
+    const r = d1[i];
+    if (!r[0]) continue;
+    result.john.push({
+      name:r[0],date:r[1],leads:r[2],convos:r[3],sets:r[4],
+      cal:r[5],live:r[6],closes:r[7],downsells:r[8],
+      cash:r[9],rev:r[10],rating:r[11],objections:r[12],notes:r[13]
+    });
+  }
+
+  const s2 = ss.getSheets()[1];
+  const d2 = s2.getDataRange().getValues();
+  for (let i = 1; i &lt; d2.length; i++) {
+    const r = d2[i];
+    if (!r[0]) continue;
+    result.prabh.push({
+      name:r[0],date:r[1],dials:r[2],connections:r[3],convos:r[4],
+      sets:r[5],cal:r[6],live:r[7],closes:r[8],downsells:r[9],
+      cash:r[10],rev:r[11],rating:r[12],objections:r[13],notes:r[14]
+    });
+  }
+
+  const s3 = ss.getSheets()[2];
+  const d3 = s3.getDataRange().getValues();
+  for (let i = 1; i &lt; d3.length; i++) {
+    const r = d3[i];
+    if (!r[0]) continue;
+    result.calls.push({
+      closer:r[0],date:r[1],email:r[2],summary:r[3],
+      offer:r[4],status:r[5],cash:r[6],rev:r[7],recording:r[8]
+    });
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>Click <strong>Deploy → New Deployment</strong>. Set type to <strong>Web App</strong>. Execute as <strong>Me</strong>. Who has access: <strong>Anyone</strong>. Click Deploy.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>Copy the Web App URL and paste it into the field above. Click <strong>Sync Sheet</strong> to pull live data.</div>
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATIC DATA — April/May 2026 Apex Trading
+// ═══════════════════════════════════════════════
+const STATIC = {
+  john: [
+    {name:"John",date:"4/1/2026",leads:24,convos:8,sets:3,cal:3,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+    {name:"John",date:"4/2/2026",leads:18,convos:5,sets:2,cal:2,live:2,closes:2,downsells:0,cash:6000,rev:12000,rating:5,notes:""},
+    {name:"John",date:"4/3/2026",leads:22,convos:7,sets:2,cal:2,live:1,closes:0,downsells:0,cash:0,rev:0,rating:3,notes:""},
+    {name:"John",date:"4/7/2026",leads:30,convos:10,sets:4,cal:4,live:3,closes:2,downsells:1,cash:5000,rev:10000,rating:4,notes:""},
+    {name:"John",date:"4/8/2026",leads:19,convos:6,sets:2,cal:3,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+    {name:"John",date:"4/14/2026",leads:26,convos:9,sets:3,cal:3,live:3,closes:2,downsells:0,cash:6000,rev:12000,rating:5,notes:""},
+    {name:"John",date:"4/21/2026",leads:20,convos:7,sets:2,cal:2,live:1,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+    {name:"John",date:"4/28/2026",leads:15,convos:4,sets:1,cal:1,live:1,closes:0,downsells:0,cash:0,rev:0,rating:3,notes:""},
+    {name:"John",date:"5/1/2026",leads:28,convos:9,sets:3,cal:3,live:3,closes:2,downsells:1,cash:5500,rev:11000,rating:5,notes:""},
+    {name:"John",date:"5/5/2026",leads:22,convos:8,sets:3,cal:3,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+    {name:"John",date:"5/12/2026",leads:25,convos:8,sets:3,cal:4,live:3,closes:2,downsells:0,cash:6000,rev:12000,rating:5,notes:""},
+    {name:"John",date:"5/19/2026",leads:17,convos:5,sets:2,cal:2,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+    {name:"John",date:"5/26/2026",leads:21,convos:7,sets:2,cal:2,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+  ],
+  prabh: [
+    {name:"Prabh",date:"4/1/2026",dials:80,connections:22,convos:10,sets:4,cal:4,live:3,closes:2,downsells:0,cash:6000,rev:12000,rating:4,notes:""},
+    {name:"Prabh",date:"4/2/2026",dials:75,connections:20,convos:9,sets:3,cal:3,live:2,closes:1,downsells:1,cash:2500,rev:5000,rating:3,notes:""},
+    {name:"Prabh",date:"4/3/2026",dials:90,connections:28,convos:12,sets:5,cal:5,live:4,closes:3,downsells:0,cash:9000,rev:18000,rating:5,notes:""},
+    {name:"Prabh",date:"4/7/2026",dials:65,connections:18,convos:8,sets:3,cal:3,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+    {name:"Prabh",date:"4/8/2026",dials:85,connections:24,convos:11,sets:4,cal:4,live:3,closes:2,downsells:1,cash:5000,rev:10000,rating:4,notes:""},
+    {name:"Prabh",date:"4/9/2026",dials:70,connections:19,convos:8,sets:3,cal:3,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+    {name:"Prabh",date:"4/14/2026",dials:95,connections:30,convos:13,sets:5,cal:5,live:4,closes:3,downsells:0,cash:9000,rev:18000,rating:5,notes:""},
+    {name:"Prabh",date:"4/15/2026",dials:60,connections:15,convos:6,sets:2,cal:2,live:1,closes:0,downsells:0,cash:0,rev:0,rating:2,notes:""},
+    {name:"Prabh",date:"4/21/2026",dials:88,connections:26,convos:11,sets:4,cal:4,live:3,closes:2,downsells:1,cash:5000,rev:10000,rating:4,notes:""},
+    {name:"Prabh",date:"4/28/2026",dials:72,connections:20,convos:9,sets:3,cal:3,live:3,closes:2,downsells:0,cash:6000,rev:12000,rating:5,notes:""},
+    {name:"Prabh",date:"5/1/2026",dials:100,connections:32,convos:14,sets:6,cal:6,live:5,closes:3,downsells:1,cash:8000,rev:16000,rating:5,notes:""},
+    {name:"Prabh",date:"5/5/2026",dials:78,connections:22,convos:10,sets:4,cal:4,live:3,closes:2,downsells:0,cash:6000,rev:12000,rating:4,notes:""},
+    {name:"Prabh",date:"5/12/2026",dials:82,connections:24,convos:11,sets:4,cal:4,live:3,closes:2,downsells:1,cash:5000,rev:10000,rating:4,notes:""},
+    {name:"Prabh",date:"5/19/2026",dials:68,connections:18,convos:8,sets:3,cal:3,live:2,closes:1,downsells:0,cash:3000,rev:6000,rating:3,notes:""},
+    {name:"Prabh",date:"5/26/2026",dials:91,connections:28,convos:12,sets:5,cal:5,live:4,closes:3,downsells:0,cash:9000,rev:18000,rating:5,notes:""},
+    {name:"Prabh",date:"5/27/2026",dials:55,connections:14,convos:6,sets:2,cal:2,live:1,closes:1,downsells:0,cash:3000,rev:6000,rating:4,notes:""},
+  ],
+  calls: [
+    {closer:"Jared",date:"4/1/2026",email:"mike.t@gmail.com",summary:"Interested in prop firm funding",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/1"},
+    {closer:"Jared",date:"4/1/2026",email:"sarah.k@outlook.com",summary:"Already trading, wants community",offer:"Apex Pro",status:"Closed",cash:3000,rev:6000,recording:""},
+    {closer:"Jared",date:"4/2/2026",email:"daniel.r@gmail.com",summary:"New to trading, no capital",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/2"},
+    {closer:"Jared",date:"4/2/2026",email:"jessica.m@yahoo.com",summary:"Evaluating multiple programs",offer:"Apex Pro",status:"Closed",cash:3000,rev:6000,recording:""},
+    {closer:"Jared",date:"4/3/2026",email:"tom.w@gmail.com",summary:"Former trader returning",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/3"},
+    {closer:"Jared",date:"4/3/2026",email:"chris.b@gmail.com",summary:"Strong objection on price",offer:"Apex Elite",status:"Lost",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"4/3/2026",email:"emily.d@outlook.com",summary:"No credit card on call",offer:"Apex Pro",status:"Closed",cash:3000,rev:6000,recording:""},
+    {closer:"Jared",date:"4/7/2026",email:"ryan.s@gmail.com",summary:"Wants funding immediately",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/4"},
+    {closer:"Jared",date:"4/7/2026",email:"amanda.p@gmail.com",summary:"Said she'd think about it",offer:"Apex Pro",status:"Follow Up",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"4/7/2026",email:"kevin.l@outlook.com",summary:"Good call, buying tomorrow",offer:"Apex Elite",status:"Deposit",cash:500,rev:6000,recording:""},
+    {closer:"Jared",date:"4/8/2026",email:"laura.n@gmail.com",summary:"College student, no money",offer:"Apex Pro",status:"Bad Fit",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"4/8/2026",email:"james.h@gmail.com",summary:"Ready to go, easy close",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/5"},
+    {closer:"Jared",date:"4/14/2026",email:"megan.o@gmail.com",summary:"Has capital, wants proof of results",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/6"},
+    {closer:"Jared",date:"4/14/2026",email:"alex.g@gmail.com",summary:"Didn't show",offer:"Apex Pro",status:"No Show",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"4/14/2026",email:"brittany.c@yahoo.com",summary:"Very interested, partner needs convincing",offer:"Apex Elite",status:"Follow Up",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"4/14/2026",email:"steven.v@gmail.com",summary:"Strong call, secured deposit",offer:"Apex Elite",status:"Deposit",cash:500,rev:6000,recording:""},
+    {closer:"Jared",date:"4/21/2026",email:"natalie.f@gmail.com",summary:"Closed on first call",offer:"Apex Pro",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/7"},
+    {closer:"Jared",date:"4/21/2026",email:"derek.j@outlook.com",summary:"Not a good fit at all",offer:"Apex Pro",status:"DQ",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"4/28/2026",email:"tiffany.m@gmail.com",summary:"Didn't show, rescheduled",offer:"Apex Elite",status:"No Show",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"5/1/2026",email:"brandon.k@gmail.com",summary:"Excited, paid in full",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/8"},
+    {closer:"Jared",date:"5/1/2026",email:"heather.r@gmail.com",summary:"Deposited, finalizing",offer:"Apex Elite",status:"Deposit",cash:500,rev:6000,recording:""},
+    {closer:"Jared",date:"5/1/2026",email:"mark.t@gmail.com",summary:"Closed after objection handling",offer:"Apex Pro",status:"Closed",cash:2500,rev:5000,recording:"https://zoom.us/rec/9"},
+    {closer:"Jared",date:"5/5/2026",email:"vanessa.l@gmail.com",summary:"Easy close, self-qualified",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/10"},
+    {closer:"Jared",date:"5/12/2026",email:"carlos.m@gmail.com",summary:"Closed full pay",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/11"},
+    {closer:"Jared",date:"5/12/2026",email:"jennifer.b@gmail.com",summary:"Cancelled before start",offer:"Apex Pro",status:"Cancelled",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"5/12/2026",email:"thomas.a@gmail.com",summary:"Second call, closed",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:""},
+    {closer:"Jared",date:"5/19/2026",email:"diana.p@gmail.com",summary:"Closed, payment plan",offer:"Apex Pro",status:"Closed",cash:1500,rev:6000,recording:"https://zoom.us/rec/12"},
+    {closer:"Jared",date:"5/26/2026",email:"robert.c@gmail.com",summary:"Strong objections, lost",offer:"Apex Elite",status:"Lost",cash:0,rev:0,recording:""},
+    {closer:"Jared",date:"5/26/2026",email:"linda.w@gmail.com",summary:"Closed full pay",offer:"Apex Elite",status:"Closed",cash:3000,rev:6000,recording:"https://zoom.us/rec/13"},
+    {closer:"Jared",date:"5/27/2026",email:"paul.e@gmail.com",summary:"No show, 3rd time",offer:"Apex Pro",status:"IGNORE",cash:0,rev:0,recording:""},
+  ]
+};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let DATA = JSON.parse(JSON.stringify(STATIC));
+let currentPeriod = 'all';
+let currentSetterView = 'john';
+let clPage = 1;
+const CL_PAGE_SIZE = 15;
+const GOAL = 50000;
+const charts = {};
+
+// ═══════════════════════════════════════════════
+// DATE UTILS
+// ═══════════════════════════════════════════════
+function parseDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const s = String(d).split('T')[0].trim();
+  if (s.includes('/')) {
+    const parts = s.split('/');
+    const m = parseInt(parts[0]), day = parseInt(parts[1]);
+    let y = parseInt(parts[2]);
+    if (y < 100) y += 2000;
+    return new Date(y, m - 1, day);
+  }
+  if (s.includes('-')) {
+    const parts = s.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  }
+  return null;
+}
+
+function getWeekRange() {
+  const now = new Date();
+  const day = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((day + 6) % 7));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  mon.setHours(0,0,0,0); sun.setHours(23,59,59,999);
+  return [mon, sun];
+}
+
+function getMonthRange() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  return [start, end];
+}
+
+function inPeriod(date) {
+  const d = parseDate(date);
+  if (!d) return false;
+  if (currentPeriod === 'all') return true;
+  if (currentPeriod === 'week') { const [a,b] = getWeekRange(); return d >= a && d <= b; }
+  if (currentPeriod === 'month') { const [a,b] = getMonthRange(); return d >= a && d <= b; }
+  return false;
+}
+
+function getFilteredData() {
+  return {
+    john: DATA.john.filter(r => inPeriod(r.date)),
+    prabh: DATA.prabh.filter(r => inPeriod(r.date)),
+    calls: DATA.calls.filter(r => inPeriod(r.date))
+  };
+}
+
+// ═══════════════════════════════════════════════
+// FORMAT
+// ═══════════════════════════════════════════════
+function $$(n) { return '$' + Math.round(n).toLocaleString(); }
+function pct(n, d) { return d === 0 ? '0%' : (n / d * 100).toFixed(1) + '%'; }
+function num(n) { return Math.round(n).toLocaleString(); }
+function fmtDate(d) {
+  const dt = parseDate(d); if (!dt) return d;
+  return (dt.getMonth()+1) + '/' + dt.getDate() + '/' + dt.getFullYear();
+}
+
+// ═══════════════════════════════════════════════
+// CHART HELPERS
+// ═══════════════════════════════════════════════
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+const chartDefaults = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#9898b0', font: { family: "'JetBrains Mono'" } } } },
+  scales: {
+    x: { grid: { color: '#1e1e2a' }, ticks: { color: '#5a5a78', font: { family: "'JetBrains Mono'", size: 10 } } },
+    y: { grid: { color: '#1e1e2a' }, ticks: { color: '#5a5a78', font: { family: "'JetBrains Mono'", size: 10 } } }
+  }
+};
+
+function makeChart(id, type, data, opts) {
+  destroyChart(id);
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, { type, data, options: { ...chartDefaults, ...opts } });
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.textContent.toLowerCase().includes(name.replace('calllog','call log').replace('sync','sync').replace('forecast','forecast').replace('setters','setter').replace('overview','overview'))) t.classList.add('active');
+  });
+  renderActivePage();
+}
+
+function setPeriod(p) {
+  currentPeriod = p;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.period-btn').forEach(b => { if (b.textContent.toLowerCase().startsWith(p.slice(0,2))) b.classList.add('active'); });
+  renderActivePage();
+}
+
+function renderActivePage() {
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'page-overview') renderOverview();
+  else if (id === 'page-setters') renderSetters();
+  else if (id === 'page-calllog') renderCallLog();
+  else if (id === 'page-forecast') renderForecast();
+}
+
+// ═══════════════════════════════════════════════
+// PAGE 1: OVERVIEW
+// ═══════════════════════════════════════════════
+function renderOverview() {
+  const { john, prabh, calls } = getFilteredData();
+
+  // from calls
+  const closedCalls = calls.filter(c => c.status === 'Closed' || c.status === 'Deposit');
+  const totalCash = calls.reduce((a,c) => a + (Number(c.cash)||0), 0);
+  const totalRev = calls.reduce((a,c) => a + (Number(c.rev)||0), 0);
+  const live = calls.filter(c => !['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
+  const closes = calls.filter(c => c.status === 'Closed').length;
+  const deposits = calls.filter(c => c.status === 'Deposit').length;
+  const noshows = calls.filter(c => c.status === 'No Show').length;
+  const onCal = john.reduce((a,r)=>a+(Number(r.cal)||0),0) + prabh.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const showed = john.reduce((a,r)=>a+(Number(r.live)||0),0) + prabh.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const pending = totalRev - totalCash;
+  const afterFees = totalCash * 0.97;
+  const perCall = live > 0 ? totalCash / live : 0;
+  const closedRevRows = calls.filter(c => c.status === 'Closed');
+  const aov = closedRevRows.length > 0 ? closedRevRows.reduce((a,c)=>a+(Number(c.cash)||0),0) / closedRevRows.length : 0;
+
+  document.getElementById('ov-rev').textContent = $$(totalRev);
+  document.getElementById('ov-cash').textContent = $$(totalCash);
+  document.getElementById('ov-afterfees').textContent = $$(afterFees);
+  document.getElementById('ov-pending').textContent = $$(pending);
+  document.getElementById('ov-percall').textContent = $$(perCall);
+  document.getElementById('ov-aov').textContent = $$(aov);
+  document.getElementById('ov-live').textContent = num(live);
+  document.getElementById('ov-closes').textContent = num(closes);
+  document.getElementById('ov-noshows').textContent = num(noshows);
+  document.getElementById('ov-deposits').textContent = num(deposits);
+  document.getElementById('ov-cr').textContent = pct(closes, showed);
+  document.getElementById('ov-sr').textContent = pct(showed, onCal);
+  document.getElementById('ov-nsr').textContent = pct(noshows, onCal);
+  document.getElementById('ov-noclose').textContent = num(live - closes);
+
+  // Goal bar
+  const goalPct = Math.min(totalCash / GOAL * 100, 100);
+  document.getElementById('ov-goal-pct').textContent = goalPct.toFixed(1) + '%';
+  document.getElementById('ov-cash-label').textContent = $$(totalCash) + ' collected';
+  setTimeout(() => { document.getElementById('goalBar').style.width = goalPct + '%'; }, 50);
+
+  // Pace note
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const dayOfMonth = now.getDate();
+  const daysLeft = daysInMonth - dayOfMonth;
+  const expectedByNow = GOAL / daysInMonth * dayOfMonth;
+  const needed = Math.max(GOAL - totalCash, 0);
+  const dailyNeeded = daysLeft > 0 ? needed / daysLeft : 0;
+  const paceEl = document.getElementById('ov-pace-note');
+  if (totalCash >= expectedByNow) {
+    paceEl.style.color = 'var(--green)';
+    paceEl.textContent = `On pace ✓ — need ${$$(dailyNeeded)}/day for ${daysLeft} days`;
+  } else {
+    paceEl.style.color = 'var(--amber)';
+    paceEl.textContent = `Behind pace — need ${$$(dailyNeeded)}/day for ${daysLeft} days`;
+  }
+
+  // Cash by date chart
+  const dateMap = {};
+  calls.forEach(c => {
+    const d = fmtDate(c.date);
+    dateMap[d] = (dateMap[d] || 0) + (Number(c.cash)||0);
+  });
+  const dates = Object.keys(dateMap).sort((a,b) => parseDate(a) - parseDate(b));
+  makeChart('chartCashDate', 'bar', {
+    labels: dates,
+    datasets: [{ label: 'Cash', data: dates.map(d=>dateMap[d]), backgroundColor: 'rgba(6,182,212,0.6)', borderColor: '#06b6d4', borderWidth: 1, borderRadius: 4 }]
+  }, { plugins: { legend: { display: false } } });
+
+  // Outcomes doughnut
+  const statusCounts = {};
+  calls.forEach(c => { statusCounts[c.status] = (statusCounts[c.status]||0) + 1; });
+  const statusColors = { Closed:'#22c55e', Deposit:'#f59e0b', 'Follow Up':'#3b82f6', 'No Show':'#ef4444', Lost:'#ef4444', 'Bad Fit':'#f97316', DQ:'#5a5a78', IGNORE:'#5a5a78', Cancelled:'#5a5a78' };
+  const labels = Object.keys(statusCounts);
+  makeChart('chartOutcomes', 'doughnut', {
+    labels,
+    datasets: [{ data: labels.map(l=>statusCounts[l]), backgroundColor: labels.map(l=>statusColors[l]||'#5a5a78'), borderWidth: 0 }]
+  }, { scales: undefined, plugins: { legend: { position: 'right', labels: { color: '#9898b0', font: { family: "'JetBrains Mono'", size: 11 }, padding: 12 } } } });
+}
+
+// ═══════════════════════════════════════════════
+// PAGE 2: SETTERS
+// ═══════════════════════════════════════════════
+function setSetterView(v) {
+  currentSetterView = v;
+  document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pill-btn').forEach(b => { if (b.textContent.toLowerCase() === v) b.classList.add('active'); });
+  renderSetters();
+}
+
+function renderSetters() {
+  const { john, prabh, calls } = getFilteredData();
+  renderLeaderboard(john, prabh, calls);
+  renderSetterIndividual(john, prabh);
+  renderSetterComparison(john, prabh);
+}
+
+function renderLeaderboard(john, prabh, calls) {
+  const jCash = john.reduce((a,r)=>a+(Number(r.cash)||0),0);
+  const jRev  = john.reduce((a,r)=>a+(Number(r.rev)||0),0);
+  const jLeads= john.reduce((a,r)=>a+(Number(r.leads)||0),0);
+  const jSets = john.reduce((a,r)=>a+(Number(r.sets)||0),0);
+  const jClose= john.reduce((a,r)=>a+(Number(r.closes)||0),0);
+  const jLive = john.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const jCR   = pct(jClose, jLive);
+
+  const pCash = prabh.reduce((a,r)=>a+(Number(r.cash)||0),0);
+  const pRev  = prabh.reduce((a,r)=>a+(Number(r.rev)||0),0);
+  const pDials= prabh.reduce((a,r)=>a+(Number(r.dials)||0),0);
+  const pSets = prabh.reduce((a,r)=>a+(Number(r.sets)||0),0);
+  const pClose= prabh.reduce((a,r)=>a+(Number(r.closes)||0),0);
+  const pLive = prabh.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const pCR   = pct(pClose, pLive);
+
+  const jTotal = jared_cash(calls);
+  const jaredCash = jTotal;
+
+  const people = [
+    { name:'Jared', role:'Closer', cash:jaredCash, rev:jaredCash*2, metric:num(calls.filter(c=>c.status==='Closed').length), metricLabel:'Closes', cr:pct(calls.filter(c=>c.status==='Closed').length, calls.filter(c=>!['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length), avatar:'JA', color:'var(--green)' },
+    { name:'Prabh', role:'Phone Setter', cash:pCash, rev:pRev, metric:num(pDials), metricLabel:'Dials', cr:pCR, avatar:'PR', color:'var(--teal)' },
+    { name:'John',  role:'DM Setter',    cash:jCash, rev:jRev, metric:num(jLeads), metricLabel:'Leads', cr:jCR, avatar:'JO', color:'var(--blue)' },
+  ].sort((a,b) => b.cash - a.cash);
+
+  const ranks = ['🥇','🥈','🥉'];
+  const el = document.getElementById('leaderboard');
+  el.innerHTML = people.map((p,i) => `
+    <div class="lb-row">
+      <div class="lb-rank">${ranks[i]}</div>
+      <div class="lb-avatar" style="background:${p.color}22;color:${p.color}">${p.avatar}</div>
+      <div class="lb-info">
+        <div class="lb-name">${p.name}</div>
+        <div class="lb-role">${p.role}</div>
+      </div>
+      <div class="lb-stats">
+        <div class="lb-stat"><div class="lb-stat-val text-teal">${$$(p.cash)}</div><div class="lb-stat-label">Cash</div></div>
+        <div class="lb-stat"><div class="lb-stat-val text-green">${$$(p.rev)}</div><div class="lb-stat-label">Revenue</div></div>
+        <div class="lb-stat"><div class="lb-stat-val">${p.metric}</div><div class="lb-stat-label">${p.metricLabel}</div></div>
+        <div class="lb-stat"><div class="lb-stat-val">${p.cr}</div><div class="lb-stat-label">Close Rate</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function jared_cash(calls) {
+  return calls.reduce((a,c) => a + (Number(c.cash)||0), 0);
+}
+
+function renderSetterIndividual(john, prabh) {
+  const data = currentSetterView === 'john' ? john : prabh;
+  const el = document.getElementById('setter-stats');
+
+  if (currentSetterView === 'prabh') {
+    const dials = data.reduce((a,r)=>a+(Number(r.dials)||0),0);
+    const conns = data.reduce((a,r)=>a+(Number(r.connections)||0),0);
+    const convos= data.reduce((a,r)=>a+(Number(r.convos)||0),0);
+    const sets  = data.reduce((a,r)=>a+(Number(r.sets)||0),0);
+    const cal   = data.reduce((a,r)=>a+(Number(r.cal)||0),0);
+    const live  = data.reduce((a,r)=>a+(Number(r.live)||0),0);
+    const closes= data.reduce((a,r)=>a+(Number(r.closes)||0),0);
+    const ds    = data.reduce((a,r)=>a+(Number(r.downsells)||0),0);
+    const cash  = data.reduce((a,r)=>a+(Number(r.cash)||0),0);
+    const rev   = data.reduce((a,r)=>a+(Number(r.rev)||0),0);
+    const showR = pct(live, cal);
+    const closeR= pct(closes, live);
+    const pickup= pct(conns, dials);
+    const qualR = pct(convos, conns);
+    const setR  = pct(sets, conns);
+
+    el.innerHTML = `
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('Total Dials',num(dials),'var(--teal)')}
+        ${kc('Connections',num(conns),'var(--blue)')}
+        ${kc('Qualified Convos',num(convos),'var(--green)')}
+        ${kc('Appointments Set',num(sets),'var(--amber)')}
+        ${kc('Cash Collected',$$(cash),'var(--teal)')}
+      </div>
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('On Calendar',num(cal),'var(--purple)')}
+        ${kc('Calls Showed',num(live),'var(--green)')}
+        ${kc('Total Closes',num(closes),'var(--green)')}
+        ${kc('Downsells',num(ds),'var(--orange)')}
+        ${kc('Revenue Generated',$$(rev),'var(--green)')}
+      </div>
+      <div class="grid-5">
+        ${kc('Show Rate',showR,'var(--blue)')}
+        ${kc('Close Rate',closeR,'var(--green)')}
+        ${kc('Pickup Rate',pickup,'var(--teal)')}
+        ${kc('Qualified Convo Rate',qualR,'var(--amber)')}
+        ${kc('Set Rate',setR,'var(--purple)')}
+      </div>`;
+
+    // Funnel
+    renderFunnel([
+      {label:'Dials',val:dials},
+      {label:'Connections',val:conns},
+      {label:'Convos',val:convos},
+      {label:'Sets',val:sets},
+      {label:'On Cal',val:cal},
+      {label:'Showed',val:live},
+    ]);
+
+    // Table
+    renderSetterTable(['Date','Dials','Conns','Convos','Sets','Cal','Live','Closes','DS','Cash','Rev','Rating'],
+      data.map(r => [fmtDate(r.date),r.dials,r.connections,r.convos,r.sets,r.cal,r.live,r.closes,r.downsells,$$(r.cash),$$(r.rev),r.rating]));
+
+    // Sets/day chart
+    const labels = data.map(r=>fmtDate(r.date));
+    renderSetsChart(labels, data.map(r=>Number(r.sets)||0));
+
+  } else {
+    const leads = data.reduce((a,r)=>a+(Number(r.leads)||0),0);
+    const convos= data.reduce((a,r)=>a+(Number(r.convos)||0),0);
+    const sets  = data.reduce((a,r)=>a+(Number(r.sets)||0),0);
+    const cal   = data.reduce((a,r)=>a+(Number(r.cal)||0),0);
+    const live  = data.reduce((a,r)=>a+(Number(r.live)||0),0);
+    const closes= data.reduce((a,r)=>a+(Number(r.closes)||0),0);
+    const ds    = data.reduce((a,r)=>a+(Number(r.downsells)||0),0);
+    const cash  = data.reduce((a,r)=>a+(Number(r.cash)||0),0);
+    const rev   = data.reduce((a,r)=>a+(Number(r.rev)||0),0);
+    const showR = pct(live, cal);
+    const closeR= pct(closes, live);
+    const qualR = pct(convos, leads);
+    const setR  = pct(sets, convos);
+
+    el.innerHTML = `
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('Leads Contacted',num(leads),'var(--teal)')}
+        ${kc('Qualified Convos',num(convos),'var(--blue)')}
+        ${kc('Appointments Set',num(sets),'var(--green)')}
+        ${kc('On Calendar',num(cal),'var(--amber)')}
+        ${kc('Cash Collected',$$(cash),'var(--teal)')}
+      </div>
+      <div class="grid-4" style="margin-bottom:10px">
+        ${kc('Calls Showed',num(live),'var(--green)')}
+        ${kc('Total Closes',num(closes),'var(--green)')}
+        ${kc('Downsells',num(ds),'var(--orange)')}
+        ${kc('Revenue Generated',$$(rev),'var(--green)')}
+      </div>
+      <div class="grid-4">
+        ${kc('Show Rate',showR,'var(--blue)')}
+        ${kc('Close Rate',closeR,'var(--green)')}
+        ${kc('Qualified Convo Rate',qualR,'var(--amber)')}
+        ${kc('Set Rate',setR,'var(--purple)')}
+      </div>`;
+
+    renderFunnel([
+      {label:'Leads',val:leads},
+      {label:'Convos',val:convos},
+      {label:'Sets',val:sets},
+      {label:'On Cal',val:cal},
+      {label:'Showed',val:live},
+    ]);
+
+    renderSetterTable(['Date','Leads','Convos','Sets','Cal','Live','Closes','DS','Cash','Rev','Rating'],
+      data.map(r => [fmtDate(r.date),r.leads,r.convos,r.sets,r.cal,r.live,r.closes,r.downsells,$$(r.cash),$$(r.rev),r.rating]));
+
+    const labels = data.map(r=>fmtDate(r.date));
+    renderSetsChart(labels, data.map(r=>Number(r.sets)||0));
+  }
+}
+
+function kc(label, value, color) {
+  return `<div class="kpi-card" style="border-top-color:${color}">
+    <div class="kpi-label">${label}</div>
+    <div class="kpi-value mono" style="color:${color};font-size:18px">${value}</div>
+  </div>`;
+}
+
+function renderFunnel(steps) {
+  const top = steps[0].val || 1;
+  const colors = ['var(--teal)','var(--blue)','var(--green)','var(--amber)','var(--purple)','var(--orange)'];
+  const el = document.getElementById('setter-funnel');
+  el.innerHTML = steps.map((s,i) => {
+    const w = Math.round(s.val / top * 100);
+    const drop = i > 0 && steps[i-1].val > 0 ? pct(s.val, steps[i-1].val) : '—';
+    return `<div class="funnel-step">
+      <div class="funnel-label">${s.label}</div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" style="width:${w}%;background:${colors[i]}22;color:${colors[i]}">${num(s.val)}</div>
+      </div>
+      <div class="funnel-pct">${drop}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSetterTable(headers, rows) {
+  const el = document.getElementById('setter-table');
+  el.innerHTML = `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c||'—'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+function renderSetsChart(labels, data) {
+  destroyChart('chartSetsDay');
+  const ctx = document.getElementById('chartSetsDay');
+  if (!ctx) return;
+  charts['chartSetsDay'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label:'Sets', data, borderColor:'var(--green)', backgroundColor:'rgba(34,197,94,.1)', fill:true, tension:0.3, pointRadius:4, pointBackgroundColor:'var(--green)' }] },
+    options: { ...chartDefaults, plugins: { legend: { display: false } } }
+  });
+}
+
+function renderSetterComparison(john, prabh) {
+  const jLeads = john.reduce((a,r)=>a+(Number(r.leads)||0),0);
+  const jConvos= john.reduce((a,r)=>a+(Number(r.convos)||0),0);
+  const jSets  = john.reduce((a,r)=>a+(Number(r.sets)||0),0);
+  const jCal   = john.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const jLive  = john.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const jClose = john.reduce((a,r)=>a+(Number(r.closes)||0),0);
+
+  const pDials = prabh.reduce((a,r)=>a+(Number(r.dials)||0),0);
+  const pConns = prabh.reduce((a,r)=>a+(Number(r.connections)||0),0);
+  const pConvos= prabh.reduce((a,r)=>a+(Number(r.convos)||0),0);
+  const pSets  = prabh.reduce((a,r)=>a+(Number(r.sets)||0),0);
+  const pCal   = prabh.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const pLive  = prabh.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const pClose = prabh.reduce((a,r)=>a+(Number(r.closes)||0),0);
+
+  const labels = ['Contacted','Connections','Convos','Sets','On Cal','Showed','Closes'];
+  const jData  = [jLeads, 0, jConvos, jSets, jCal, jLive, jClose];
+  const pData  = [pDials, pConns, pConvos, pSets, pCal, pLive, pClose];
+
+  destroyChart('chartSetterComp');
+  const ctx = document.getElementById('chartSetterComp');
+  if (!ctx) return;
+  charts['chartSetterComp'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'John (DM)', data:jData, backgroundColor:'rgba(59,130,246,0.6)', borderColor:'#3b82f6', borderWidth:1, borderRadius:4 },
+        { label:'Prabh (Phone)', data:pData, backgroundColor:'rgba(6,182,212,0.6)', borderColor:'#06b6d4', borderWidth:1, borderRadius:4 },
+      ]
+    },
+    options: { ...chartDefaults }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// PAGE 3: CALL LOG
+// ═══════════════════════════════════════════════
+function renderCallLog() {
+  const { calls } = getFilteredData();
+  const search = document.getElementById('cl-search').value.toLowerCase();
+  const status = document.getElementById('cl-status').value;
+  const sort   = document.getElementById('cl-sort').value;
+
+  let filtered = calls.filter(c => {
+    const matchSearch = !search || [c.email,c.status,c.summary,c.offer].join(' ').toLowerCase().includes(search);
+    const matchStatus = !status || c.status === status;
+    return matchSearch && matchStatus;
+  });
+
+  if (sort === 'date-desc') filtered.sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+  else if (sort === 'date-asc') filtered.sort((a,b)=>parseDate(a.date)-parseDate(b.date));
+  else if (sort === 'cash-desc') filtered.sort((a,b)=>Number(b.cash)-Number(a.cash));
+  else if (sort === 'cash-asc') filtered.sort((a,b)=>Number(a.cash)-Number(b.cash));
+
+  // Stats
+  const fRev  = filtered.reduce((a,c)=>a+(Number(c.rev)||0),0);
+  const fCash = filtered.reduce((a,c)=>a+(Number(c.cash)||0),0);
+  const fClose= filtered.filter(c=>c.status==='Closed').length;
+  const fLive = filtered.filter(c=>!['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
+  document.getElementById('cl-rev').textContent = $$(fRev);
+  document.getElementById('cl-cash').textContent = $$(fCash);
+  document.getElementById('cl-cr').textContent = pct(fClose, fLive);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filtered.length / CL_PAGE_SIZE));
+  if (clPage > totalPages) clPage = 1;
+  const start = (clPage - 1) * CL_PAGE_SIZE;
+  const page  = filtered.slice(start, start + CL_PAGE_SIZE);
+
+  const badgeMap = { Closed:'badge-green', Deposit:'badge-amber', 'Follow Up':'badge-blue', 'No Show':'badge-red', Lost:'badge-red', 'Bad Fit':'badge-orange', DQ:'badge-gray', IGNORE:'badge-gray', Cancelled:'badge-gray' };
+
+  document.getElementById('calllog-table').innerHTML = `<table>
+    <thead><tr><th>Date</th><th>Lead</th><th>Status</th><th>Cash</th><th>Revenue</th><th>Recording</th><th>Notes</th></tr></thead>
+    <tbody>${page.map(c=>`<tr>
+      <td class="mono">${fmtDate(c.date)}</td>
+      <td>${c.email||'—'}</td>
+      <td><span class="badge ${badgeMap[c.status]||'badge-gray'}">${c.status||'—'}</span></td>
+      <td class="mono text-teal">${$$(Number(c.cash)||0)}</td>
+      <td class="mono text-green">${$$(Number(c.rev)||0)}</td>
+      <td>${c.recording ? `<a href="${c.recording}" target="_blank" style="color:var(--blue);text-decoration:none">▶ Watch</a>` : '—'}</td>
+      <td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis">${c.summary||'—'}</td>
+    </tr>`).join('')}</tbody></table>`;
+
+  // Pagination
+  const pg = document.getElementById('cl-pagination');
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+  let btns = '';
+  btns += `<button class="page-btn" onclick="clGoPage(${clPage-1})" ${clPage===1?'disabled':''}>‹ Prev</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - clPage) <= 1) {
+      btns += `<button class="page-btn ${i===clPage?'active':''}" onclick="clGoPage(${i})">${i}</button>`;
+    } else if (Math.abs(i - clPage) === 2) {
+      btns += `<span style="color:var(--text3);padding:0 4px">…</span>`;
+    }
+  }
+  btns += `<button class="page-btn" onclick="clGoPage(${clPage+1})" ${clPage===totalPages?'disabled':''}>Next ›</button>`;
+  pg.innerHTML = btns;
+}
+
+function clGoPage(p) {
+  const { calls } = getFilteredData();
+  const total = Math.ceil(calls.length / CL_PAGE_SIZE);
+  clPage = Math.max(1, Math.min(p, total));
+  renderCallLog();
+}
+
+// ═══════════════════════════════════════════════
+// PAGE 4: FORECAST
+// ═══════════════════════════════════════════════
+function renderForecast() {
+  const { john, prabh, calls } = getFilteredData();
+  const totalCash = calls.reduce((a,c)=>a+(Number(c.cash)||0),0);
+  const closes = calls.filter(c=>c.status==='Closed').length;
+  const showed = john.reduce((a,r)=>a+(Number(r.live)||0),0) + prabh.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const onCal  = john.reduce((a,r)=>a+(Number(r.cal)||0),0) + prabh.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const sets   = john.reduce((a,r)=>a+(Number(r.sets)||0),0) + prabh.reduce((a,r)=>a+(Number(r.sets)||0),0);
+
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const dayOfMonth  = now.getDate();
+  const daysLeft    = daysInMonth - dayOfMonth;
+
+  const needed   = Math.max(GOAL - totalCash, 0);
+  const dailyRate= daysLeft > 0 ? needed / daysLeft : 0;
+  const dailyCash= dayOfMonth > 0 ? totalCash / dayOfMonth : 0;
+  const projected= dailyCash * daysInMonth;
+
+  const closeRate= showed > 0 ? closes / showed : 0;
+  const showRate = onCal  > 0 ? showed / onCal  : 0;
+  const avgDeal  = closes > 0 ? totalCash / closes : 0;
+  const closesNeeded = avgDeal > 0 ? Math.ceil(needed / avgDeal) : '—';
+  const callsNeeded  = closeRate > 0 && typeof closesNeeded === 'number' ? Math.ceil(closesNeeded / closeRate) : '—';
+  const setsNeeded   = showRate  > 0 && typeof callsNeeded  === 'number' ? Math.ceil(callsNeeded  / showRate)  : '—';
+  const expectedPace = GOAL / daysInMonth * dayOfMonth;
+  const vsPace       = totalCash - expectedPace;
+
+  document.getElementById('fc-cash').textContent = $$(totalCash);
+  document.getElementById('fc-need').textContent = $$(needed);
+  document.getElementById('fc-rate').textContent = $$(dailyRate);
+  document.getElementById('fc-proj').textContent = $$(projected);
+  const projCard = document.getElementById('fc-proj-card');
+  projCard.style.borderTopColor = projected >= GOAL ? 'var(--green)' : 'var(--red)';
+  document.getElementById('fc-proj').style.color = projected >= GOAL ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('fc-days-left').textContent = daysLeft;
+  document.getElementById('fc-deal').textContent = $$(avgDeal);
+  document.getElementById('fc-cr').textContent = pct(closes, showed);
+  document.getElementById('fc-show').textContent = pct(showed, onCal);
+  document.getElementById('fc-closes-need').textContent = closesNeeded;
+  document.getElementById('fc-calls-need').textContent = callsNeeded;
+  document.getElementById('fc-sets-need').textContent = setsNeeded;
+  const vpEl = document.getElementById('fc-vs-pace');
+  vpEl.textContent = (vsPace >= 0 ? '+' : '') + $$(vsPace);
+  vpEl.style.color = vsPace >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // Cumulative cash chart
+  const dailyMap = {};
+  calls.forEach(c => {
+    const d = parseDate(c.date);
+    if (!d) return;
+    const key = d.getDate();
+    dailyMap[key] = (dailyMap[key]||0) + (Number(c.cash)||0);
+  });
+  const days = Array.from({length:daysInMonth}, (_,i)=>i+1);
+  let running = 0;
+  const actualLine = days.map(d => {
+    if (d <= dayOfMonth) { running += (dailyMap[d]||0); return running; }
+    return null;
+  });
+  const goalLine = days.map(d => GOAL / daysInMonth * d);
+
+  destroyChart('chartCumulative');
+  const ctx1 = document.getElementById('chartCumulative');
+  if (ctx1) charts['chartCumulative'] = new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels: days.map(d=>'D'+d),
+      datasets: [
+        { label:'Cash Collected', data:actualLine, borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,.08)', fill:true, tension:0.3, pointRadius:2 },
+        { label:'Goal Pace', data:goalLine, borderColor:'#5a5a78', borderDash:[6,4], borderWidth:1.5, fill:false, pointRadius:0 }
+      ]
+    },
+    options: { ...chartDefaults }
+  });
+
+  // Rev vs Cash chart
+  const closedCalls = calls.filter(c => c.status === 'Closed' && (Number(c.cash)||0) > 0);
+  const rvLabels = closedCalls.map(c => c.email ? c.email.split('@')[0] : fmtDate(c.date));
+  destroyChart('chartRevCash');
+  const ctx2 = document.getElementById('chartRevCash');
+  if (ctx2) charts['chartRevCash'] = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: rvLabels,
+      datasets: [
+        { label:'Revenue', data:closedCalls.map(c=>Number(c.rev)||0), backgroundColor:'rgba(34,197,94,.5)', borderRadius:3 },
+        { label:'Cash',    data:closedCalls.map(c=>Number(c.cash)||0), backgroundColor:'rgba(6,182,212,.5)', borderRadius:3 }
+      ]
+    },
+    options: { ...chartDefaults }
+  });
+
+  // Daily log table
+  let runTotal = 0;
+  const logRows = days.filter(d => d <= dayOfMonth && dailyMap[d]).map(d => {
+    runTotal += dailyMap[d]||0;
+    const pace = GOAL / daysInMonth * d;
+    const delta = runTotal - pace;
+    return `<tr>
+      <td class="mono">Day ${d}</td>
+      <td class="mono text-teal">${$$(dailyMap[d]||0)}</td>
+      <td class="mono text-green">${$$(runTotal)}</td>
+      <td class="mono" style="color:${delta>=0?'var(--green)':'var(--red)'}">${delta>=0?'+':''}${$$(delta)}</td>
+    </tr>`;
+  });
+  document.getElementById('fc-log-table').innerHTML = `<table>
+    <thead><tr><th>Day</th><th>Cash</th><th>Running Total</th><th>vs Pace</th></tr></thead>
+    <tbody>${logRows.join('')}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════
+// SYNC
+// ═══════════════════════════════════════════════
+function saveScriptUrl() {
+  const url = document.getElementById('scriptUrlInput').value.trim();
+  localStorage.setItem('apex_script_url', url);
+}
+
+function normalizeData(raw) {
+  const normalize = (arr, defaults) => arr.map(r => {
+    const obj = {};
+    Object.keys(defaults).forEach(k => { obj[k] = r[k] !== undefined ? r[k] : defaults[k]; });
+    return obj;
+  });
+  return {
+    john:  normalize(raw.john  || [], {name:'',date:'',leads:0,convos:0,sets:0,cal:0,live:0,closes:0,downsells:0,cash:0,rev:0,rating:0,notes:''}),
+    prabh: normalize(raw.prabh || [], {name:'',date:'',dials:0,connections:0,convos:0,sets:0,cal:0,live:0,closes:0,downsells:0,cash:0,rev:0,rating:0,notes:''}),
+    calls: normalize(raw.calls || [], {closer:'',date:'',email:'',summary:'',offer:'',status:'',cash:0,rev:0,recording:''}),
+  };
+}
+
+async function syncData() {
+  const url = localStorage.getItem('apex_script_url') || document.getElementById('scriptUrlInput').value.trim();
+  if (!url) { alert('Please enter your Apps Script URL in the Sync Setup page first.'); return; }
+
+  const btn = document.getElementById('syncBtn');
+  btn.textContent = '↻ Syncing…';
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const raw = await resp.json();
+    localStorage.setItem('apex_cached_data', JSON.stringify(raw));
+    const ts = new Date().toLocaleString();
+    localStorage.setItem('apex_cached_time', ts);
+    document.getElementById('syncTime').textContent = 'Synced ' + ts;
+    DATA = normalizeData(raw);
+    renderActivePage();
+  } catch(e) {
+    alert('Sync failed: ' + e.message);
+  } finally {
+    btn.textContent = '↻ Sync Sheet';
+    btn.disabled = false;
+  }
+}
+
+async function testConnection() {
+  const url = document.getElementById('scriptUrlInput').value.trim();
+  const res = document.getElementById('testResult');
+  if (!url) { res.textContent = 'Enter a URL first.'; return; }
+  res.textContent = 'Testing…';
+  try {
+    const r = await fetch(url);
+    const j = await r.json();
+    const counts = `john: ${(j.john||[]).length} rows, prabh: ${(j.prabh||[]).length} rows, calls: ${(j.calls||[]).length} rows`;
+    res.style.color = 'var(--green)';
+    res.textContent = '✓ Connected — ' + counts;
+  } catch(e) {
+    res.style.color = 'var(--red)';
+    res.textContent = '✗ Failed: ' + e.message;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+(function init() {
+  // Load cached data
+  const cached = localStorage.getItem('apex_cached_data');
+  if (cached) {
+    try { DATA = normalizeData(JSON.parse(cached)); } catch(e) { DATA = JSON.parse(JSON.stringify(STATIC)); }
+  }
+
+  // Restore URL
+  const savedUrl = localStorage.getItem('apex_script_url');
+  if (savedUrl) document.getElementById('scriptUrlInput').value = savedUrl;
+
+  // Restore sync time
+  const cachedTime = localStorage.getItem('apex_cached_time');
+  if (cachedTime) document.getElementById('syncTime').textContent = 'Synced ' + cachedTime;
+
+  // Auto-sync if URL exists
+  if (savedUrl) syncData();
+
+  // Set period button
+  document.querySelectorAll('.period-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.textContent.toLowerCase().startsWith(currentPeriod.slice(0,2))) b.classList.add('active');
+  });
+
+  renderOverview();
+})();
+</script>
+</body>
+</html>
