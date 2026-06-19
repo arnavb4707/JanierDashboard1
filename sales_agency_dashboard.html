@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Agency Dashboard</title>
+<title>Janier Sales — Sales Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -12,7 +12,7 @@
   --bg0:#0a0b0f; --bg1:#10111a; --bg2:#151622; --bg3:#1b1d2c; --bg4:#222538;
   --border:#23253a; --border2:#2e3150;
   --violet:#8b5cf6; --cyan:#22d3ee; --pink:#f472b6;
-  --amber:#fbbf24; --red:#fb7185; --green:#34d399;
+  --amber:#fbbf24; --red:#fb7185; --green:#34d399; --orange:#fb923c;
   --text:#eceaf5; --text2:#9c9cc0; --text3:#5e5e80;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -21,17 +21,17 @@ body{background:var(--bg0);color:var(--text);font-family:'Inter',sans-serif;font
 
 nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100}
 .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:0.5px;white-space:nowrap;margin-right:8px}
-.brand .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));box-shadow:0 0 8px rgba(139,92,246,.7)}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));box-shadow:0 0 8px rgba(139,92,246,.7);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,.5)}50%{box-shadow:0 0 0 5px rgba(139,92,246,0)}}
 .nav-tabs{display:flex;gap:2px}
 .nav-tab{padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);border:none;background:none;transition:all .15s}
 .nav-tab:hover{color:var(--text);background:var(--bg3)}
 .nav-tab.active{color:var(--violet);background:rgba(139,92,246,.12)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.sync-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
-.sync-dot.err{background:var(--red)}
-.sync-dot.loading{background:var(--amber);animation:pulse 1.2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.period-btns{display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px}
+.period-btn{padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--text2);border:none;background:none;transition:all .15s}
+.period-btn.active{color:var(--text);background:var(--bg4)}
+.sync-info{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap}
 .btn{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;border:none;transition:all .15s}
 .btn-violet{background:rgba(139,92,246,.15);color:var(--violet);border:1px solid rgba(139,92,246,.3)}
 .btn-violet:hover{background:rgba(139,92,246,.25)}
@@ -40,12 +40,15 @@ main{padding:72px 20px 40px;max-width:1440px;margin:0 auto}
 .page{display:none}.page.active{display:block}
 .banner{background:var(--bg2);border:1px solid rgba(251,191,36,.3);color:var(--amber);border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:16px;display:none}
 .banner.show{display:block}
+.empty-state{padding:32px;text-align:center;color:var(--text3);font-size:13px;border:1px dashed var(--border2);border-radius:10px}
+.empty-state b{color:var(--text2)}
 
 .section{margin-bottom:28px}
 .section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px}
@@ -55,6 +58,11 @@ main{padding:72px 20px 40px;max-width:1440px;margin:0 auto}
 .kpi-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
 .kpi-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;line-height:1}
 .kpi-sub{font-size:11px;color:var(--text3);margin-top:5px}
+
+.goal-bar-wrap{margin-top:14px}
+.goal-bar-track{height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin:6px 0}
+.goal-bar-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:5px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.goal-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
 
 .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse}
@@ -67,19 +75,65 @@ tr:hover td{background:var(--bg3)}
 .badge-cyan{background:rgba(34,211,238,.15);color:var(--cyan)}
 .badge-red{background:rgba(251,113,133,.15);color:var(--red)}
 .badge-violet{background:rgba(139,92,246,.15);color:var(--violet)}
+.badge-orange{background:rgba(251,146,60,.15);color:var(--orange)}
 .badge-grey{background:rgba(156,156,192,.15);color:var(--text2)}
 
-.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0a0b0f;margin-right:8px;vertical-align:middle}
-.rep-row{display:flex;align-items:center}
-.chart-box{position:relative;height:260px}
-.notes-cell{max-width:280px;white-space:normal;color:var(--text2);font-size:12px}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px}
+.chart-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:14px}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap-sm{position:relative;height:160px}
+.chart-wrap-lg{position:relative;height:280px}
 
-.rank{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--bg4);color:var(--text2)}
-.rank.r1{background:rgba(251,191,36,.2);color:var(--amber)}
-.rank.r2{background:rgba(156,156,192,.2);color:var(--text)}
-.rank.r3{background:rgba(139,92,246,.2);color:var(--violet)}
+.pill-toggle{display:flex;background:var(--bg3);border-radius:8px;padding:2px;width:fit-content;margin-bottom:20px}
+.pill-btn{padding:6px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);border:none;background:none;transition:all .15s}
+.pill-btn.active{color:var(--text);background:var(--bg4)}
 
-@media (max-width:1000px){.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}}
+.lb-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:all .15s}
+.lb-row:hover{border-color:var(--border2);background:var(--bg3)}
+.lb-rank{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;width:32px;text-align:center}
+.lb-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+.lb-info{flex:1;min-width:120px}
+.lb-name{font-weight:600;font-size:15px}
+.lb-role{font-size:11px;color:var(--text2);margin-top:2px}
+.lb-stats{display:flex;gap:24px;flex-wrap:wrap}
+.lb-stat{text-align:right}
+.lb-stat-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+.lb-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+.funnel-step{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.funnel-bar-wrap{flex:1;height:28px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative}
+.funnel-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;transition:width .6s ease}
+.funnel-label{width:90px;font-size:12px;color:var(--text2);text-align:right}
+.funnel-pct{width:42px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;text-align:right}
+
+.what-need-table{width:100%}
+.what-need-table td{padding:8px 0;border-top:1px solid var(--border);font-size:13px}
+.what-need-table td:first-child{color:var(--text2)}
+.what-need-table td:last-child{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right}
+
+.setup-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:20px}
+.setup-card h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.setup-card p{color:var(--text2);font-size:13px;line-height:1.6;margin-bottom:12px}
+.setup-row{display:flex;gap:10px;margin-bottom:10px;align-items:center}
+.setup-row label{width:160px;font-size:12px;color:var(--text2);flex-shrink:0}
+input[type=text],input[type=number]{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);width:100%;font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .15s}
+input[type=text]:focus,input[type=number]:focus{border-color:var(--violet)}
+.code-block{background:var(--bg0);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text2);white-space:pre-wrap;overflow-x:auto;line-height:1.6;margin:10px 0}
+
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.filter-bar input,.filter-bar select{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);outline:none}
+.filter-bar select{cursor:pointer}
+
+.pagination{display:flex;align-items:center;gap:6px;margin-top:14px;justify-content:center}
+.page-btn{padding:5px 10px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--text2);border:1px solid var(--border);background:var(--bg3);transition:all .15s}
+.page-btn:hover,.page-btn.active{border-color:var(--violet);color:var(--violet)}
+
+.text-violet{color:var(--violet)}.text-cyan{color:var(--cyan)}.text-amber{color:var(--amber)}
+.text-red{color:var(--red)}.text-green{color:var(--green)}.text-pink{color:var(--pink)}
+.layout-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.layout-3col{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+
+@media (max-width:1000px){.grid-4,.grid-5,.grid-3,.grid-2,.layout-2col,.layout-3col{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -87,131 +141,285 @@ tr:hover td{background:var(--bg3)}
 <nav>
   <div class="brand"><span class="dot"></span>Janier Sales</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" data-page="pipeline">Funnel</button>
-    <button class="nav-tab" data-page="performance">Rep Performance</button>
-    <button class="nav-tab" data-page="revenue">Revenue & Closes</button>
-    <button class="nav-tab" data-page="accounts">Objections & Notes</button>
+    <button class="nav-tab active" onclick="showPage('overview')">Overview</button>
+    <button class="nav-tab" onclick="showPage('reps')">Reps</button>
+    <button class="nav-tab" onclick="showPage('calllog')">Call Log</button>
+    <button class="nav-tab" onclick="showPage('forecast')">Forecast</button>
+    <button class="nav-tab" onclick="showPage('setup')">⚙ Setup</button>
   </div>
   <div class="nav-right">
-    <span class="sync-pill"><span class="sync-dot loading" id="syncDot"></span><span id="syncText">Loading sheet…</span></span>
-    <button class="btn btn-violet" id="refreshBtn">Refresh</button>
+    <div class="period-btns">
+      <button class="period-btn" onclick="setPeriod('week')">Week</button>
+      <button class="period-btn" onclick="setPeriod('month')">Month</button>
+      <button class="period-btn active" onclick="setPeriod('all')">All</button>
+    </div>
+    <div class="sync-info" id="syncTime">Loading sheet…</div>
+    <button class="btn btn-violet" id="syncBtn" onclick="syncData()">↻ Refresh</button>
   </div>
 </nav>
 
 <main>
-<div class="banner" id="errBanner">Couldn't reach the Google Sheet — showing the last data loaded. Click Refresh to retry.</div>
+<div class="banner" id="errBanner">Some sheet tabs couldn't be reached — showing what's available. Check the Setup page.</div>
 
-<!-- FUNNEL / PIPELINE -->
-<div class="page active" id="page-pipeline">
+<!-- PAGE: OVERVIEW -->
+<div class="page active" id="page-overview">
   <div class="section">
-    <div class="section-title">Funnel Overview</div>
-    <div class="grid-4" id="pipelineKpis"></div>
-  </div>
-
-  <div class="section">
-    <div class="grid-2">
-      <div class="card">
-        <div class="section-title">Funnel by Stage (Totals)</div>
-        <div class="chart-box"><canvas id="chartStage"></canvas></div>
+    <div class="section-title">Cash Breakdown</div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Total Revenue Generated</div>
+        <div class="kpi-value text-green mono" id="ov-rev">$0</div>
       </div>
-      <div class="card">
-        <div class="section-title">Leads Contacted vs Qualified Convos (Daily)</div>
-        <div class="chart-box"><canvas id="chartFlow"></canvas></div>
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">Total Cash Collected</div>
+        <div class="kpi-value text-cyan mono" id="ov-cash">$0</div>
+      </div>
+    </div>
+    <div class="grid-4" style="margin-bottom:14px">
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">Cash After Fees (3%)</div>
+        <div class="kpi-value text-violet mono" id="ov-afterfees">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Cash To Be Collected</div>
+        <div class="kpi-value text-amber mono" id="ov-pending">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--pink)">
+        <div class="kpi-label">Cash Per Call Taken</div>
+        <div class="kpi-value text-pink mono" id="ov-percall">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Avg Order Value</div>
+        <div class="kpi-value text-green mono" id="ov-aov">$0</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;font-weight:600">Monthly Cash Goal — <span class="text-green" id="ov-goal-amt">$50,000</span></div>
+        <div class="mono" style="font-size:13px" id="ov-goal-pct">0%</div>
+      </div>
+      <div class="goal-bar-wrap">
+        <div class="goal-bar-track"><div class="goal-bar-fill" id="goalBar"></div></div>
+        <div class="goal-bar-labels">
+          <span id="ov-cash-label">$0 collected</span>
+          <span id="ov-pace-note" style="color:var(--amber)">—</span>
+          <span id="ov-goal-amt2">$50,000 goal</span>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Daily Log</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>Rep</th><th>Leads Contacted</th><th>Qualified</th><th>Sets</th><th>Booked</th><th>Live Calls</th><th>Closes</th></tr></thead>
-        <tbody id="dealsBody"></tbody>
-      </table>
+    <div class="section-title">Activity Breakdown</div>
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">Total Live Calls</div>
+        <div class="kpi-value text-cyan mono" id="ov-live">0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Closed Calls</div>
+        <div class="kpi-value text-green mono" id="ov-closes">0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--red)">
+        <div class="kpi-label">No Shows</div>
+        <div class="kpi-value text-red mono" id="ov-noshows">0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Deposits</div>
+        <div class="kpi-value text-amber mono" id="ov-deposits">0</div>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Close Rate</div>
+        <div class="kpi-value text-green mono" id="ov-cr">0%</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">Show Rate</div>
+        <div class="kpi-value text-violet mono" id="ov-sr">0%</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--red)">
+        <div class="kpi-label">No-Show Rate</div>
+        <div class="kpi-value text-red mono" id="ov-nsr">0%</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--orange)">
+        <div class="kpi-label">No Closes</div>
+        <div class="kpi-value mono" style="color:var(--orange)" id="ov-noclose">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Pipeline</div>
+    <div class="layout-2col">
+      <div class="chart-card">
+        <div class="chart-title">Cash Collected by Date</div>
+        <div class="chart-wrap"><canvas id="chartCashDate"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Call Outcomes</div>
+        <div class="chart-wrap"><canvas id="chartOutcomes"></canvas></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- PERFORMANCE -->
-<div class="page" id="page-performance">
+<!-- PAGE: REPS -->
+<div class="page" id="page-reps">
   <div class="section">
-    <div class="section-title">Rep Performance</div>
-    <div class="grid-4" id="performanceKpis"></div>
+    <div class="section-title">Leaderboard</div>
+    <div id="leaderboard"></div>
   </div>
-
   <div class="section">
-    <div class="grid-2">
-      <div class="card">
-        <div class="section-title">Daily Self-Rating (1-10)</div>
-        <div class="chart-box"><canvas id="chartQuota"></canvas></div>
+    <div class="section-title">Individual Breakdown</div>
+    <div class="pill-toggle" id="rep-pill-toggle"></div>
+    <div id="rep-stats"></div>
+    <div class="layout-3col" style="margin-top:20px">
+      <div>
+        <div class="section-title" style="margin-bottom:8px">Daily Activity</div>
+        <div class="table-wrap" id="rep-table"></div>
       </div>
-      <div class="card">
-        <div class="section-title">Activity Mix (Totals)</div>
-        <div class="chart-box"><canvas id="chartActivity"></canvas></div>
+      <div>
+        <div class="section-title" style="margin-bottom:8px">Conversion Funnel</div>
+        <div class="card" id="rep-funnel"></div>
       </div>
     </div>
+    <div class="chart-card" style="margin-top:14px">
+      <div class="chart-title">Sets Per Day</div>
+      <div class="chart-wrap-sm"><canvas id="chartSetsDay"></canvas></div>
+    </div>
   </div>
-
   <div class="section">
-    <div class="section-title">Best Days (ranked by Qualified Convos)</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Rank</th><th>Date</th><th>Rep</th><th>Leads Contacted</th><th>Qualified</th><th>Sets</th><th>Rate</th></tr></thead>
-        <tbody id="leaderBody"></tbody>
-      </table>
+    <div class="section-title">Setter Comparison</div>
+    <div class="chart-card">
+      <div class="chart-wrap-lg"><canvas id="chartSetterComp"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- REVENUE -->
-<div class="page" id="page-revenue">
+<!-- PAGE: CALL LOG -->
+<div class="page" id="page-calllog">
   <div class="section">
-    <div class="section-title">Revenue & Closes</div>
-    <div class="grid-4" id="revenueKpis"></div>
-  </div>
-
-  <div class="section">
-    <div class="grid-2">
-      <div class="card">
-        <div class="section-title">Cash Collected by Day</div>
-        <div class="chart-box"><canvas id="chartRevenue"></canvas></div>
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="kpi-card" style="border-top-color:var(--green)">
+        <div class="kpi-label">Filtered Revenue</div>
+        <div class="kpi-value text-green mono" id="cl-rev">$0</div>
       </div>
-      <div class="card">
-        <div class="section-title">Closes vs Downsells</div>
-        <div class="chart-box"><canvas id="chartProduct"></canvas></div>
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">Filtered Cash</div>
+        <div class="kpi-value text-cyan mono" id="cl-cash">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">Close Rate</div>
+        <div class="kpi-value text-violet mono" id="cl-cr">0%</div>
       </div>
     </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Close Log</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>Rep</th><th>Closes</th><th>Downsells</th><th>Cash Collected</th><th>Total Revenue</th></tr></thead>
-        <tbody id="commBody"></tbody>
-      </table>
+    <div class="filter-bar">
+      <input type="text" id="cl-search" placeholder="Search email, status, notes…" oninput="renderCallLog()" style="flex:1">
+      <select id="cl-status" onchange="renderCallLog()">
+        <option value="">All Statuses</option>
+        <option>Closed</option>
+        <option>Deposit</option>
+        <option>Follow Up</option>
+        <option>No Show</option>
+        <option>Lost</option>
+        <option>Bad Fit</option>
+        <option>DQ</option>
+        <option>IGNORE</option>
+        <option>Cancelled</option>
+      </select>
+      <select id="cl-sort" onchange="renderCallLog()">
+        <option value="date-desc">Date ↓</option>
+        <option value="date-asc">Date ↑</option>
+        <option value="cash-desc">Cash ↓</option>
+        <option value="cash-asc">Cash ↑</option>
+      </select>
     </div>
+    <div class="table-wrap" id="calllog-table"></div>
+    <div class="pagination" id="cl-pagination"></div>
   </div>
 </div>
 
-<!-- OBJECTIONS / NOTES -->
-<div class="page" id="page-accounts">
+<!-- PAGE: FORECAST -->
+<div class="page" id="page-forecast">
   <div class="section">
-    <div class="section-title">Objections & Notes</div>
-    <div class="grid-3" id="accountsKpis"></div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Activity Log</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>Rep</th><th>Objection</th><th>Notes</th></tr></thead>
-        <tbody id="acctBody"></tbody>
-      </table>
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="kpi-card" style="border-top-color:var(--cyan)">
+        <div class="kpi-label">Cash Collected</div>
+        <div class="kpi-value text-cyan mono" id="fc-cash">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--amber)">
+        <div class="kpi-label">Still Needed</div>
+        <div class="kpi-value text-amber mono" id="fc-need">$50,000</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--violet)">
+        <div class="kpi-label">Daily Rate Needed</div>
+        <div class="kpi-value text-violet mono" id="fc-rate">$0</div>
+      </div>
+      <div class="kpi-card" style="border-top-color:var(--green)" id="fc-proj-card">
+        <div class="kpi-label">Projected at Pace</div>
+        <div class="kpi-value mono" id="fc-proj">$0</div>
+      </div>
     </div>
+    <div class="layout-2col">
+      <div class="chart-card">
+        <div class="chart-title">Cumulative Cash vs Goal Pace</div>
+        <div class="chart-wrap-lg"><canvas id="chartCumulative"></canvas></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="chart-title" style="margin-bottom:12px">What You Need</div>
+          <table class="what-need-table">
+            <tr><td>Days Left</td><td id="fc-days-left">—</td></tr>
+            <tr><td>Avg Deal Size</td><td id="fc-deal">—</td></tr>
+            <tr><td>Current Close Rate</td><td id="fc-cr">—</td></tr>
+            <tr><td>Current Show Rate</td><td id="fc-show">—</td></tr>
+            <tr><td>Closes Needed</td><td id="fc-closes-need">—</td></tr>
+            <tr><td>Calls Needed</td><td id="fc-calls-need">—</td></tr>
+            <tr><td>Sets Needed</td><td id="fc-sets-need">—</td></tr>
+            <tr><td>vs Expected Pace</td><td id="fc-vs-pace">—</td></tr>
+          </table>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Revenue vs Cash by Close</div>
+          <div class="chart-wrap-sm"><canvas id="chartRevCash"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:24px;margin-bottom:10px">Daily Performance Log</div>
+    <div class="table-wrap" id="fc-log-table"></div>
   </div>
 </div>
 
+<!-- PAGE: SETUP -->
+<div class="page" id="page-setup">
+  <div class="setup-card">
+    <h3>Google Sheet Connection</h3>
+    <p>This dashboard reads your sheet live (no Apps Script deployment needed) — it just needs the spreadsheet ID and the tab (gid) for each role. Find a tab's gid in its URL after <span class="mono">#gid=</span> when that tab is open.</p>
+    <div class="setup-row"><label>Spreadsheet ID</label><input type="text" id="cfgSheetId"></div>
+    <div class="setup-row"><label>Monthly Cash Goal</label><input type="number" id="cfgGoal" placeholder="50000"></div>
+    <div class="setup-row"><label>DM Setter tab gid</label><input type="text" id="cfgGidDm" placeholder="0"></div>
+    <div class="setup-row"><label>Phone Setter tab gid</label><input type="text" id="cfgGidPhone" placeholder="leave blank if no tab yet"></div>
+    <div class="setup-row"><label>Closer Call Log gid</label><input type="text" id="cfgGidCalls" placeholder="leave blank if no tab yet"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-violet" onclick="saveConfig()">Save & Refresh</button>
+    </div>
+    <div id="setupResult" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
+  </div>
+
+  <div class="setup-card">
+    <h3>Adding the Phone Setter / Closer Call Log tabs</h3>
+    <p>Currently only the <b>DM Setter Input</b> tab exists, so Reps/Call Log show that role only. To light up the rest, add new tabs to the same spreadsheet with these columns (order matters), then paste their gid above:</p>
+    <div class="code-block">Phone Setter Input tab columns:
+Name | Date | Dials | Connections | Qualified Convos | Sets | Calls On Calendar |
+Live Calls | Closes | Downsells | Cash Collected | Total Revenue | Rate Today 1-10 |
+Objections | Notes
+
+Closer Call Log tab columns:
+Closer | Date | Email | Summary | Offer | Status | Cash Collected | Total Revenue | Recording Link</div>
+    <p>Status values the dashboard understands: Closed, Deposit, Follow Up, No Show, Lost, Bad Fit, DQ, IGNORE, Cancelled.</p>
+  </div>
+</div>
 </main>
 
 <script>
@@ -219,292 +427,814 @@ Chart.defaults.color = '#9c9cc0';
 Chart.defaults.font.family = "'Inter',sans-serif";
 Chart.defaults.borderColor = '#23253a';
 
-const SHEET_ID = '1jidKABEl5hVeu_Iwlqn5oKm1cfBSyvAnPhx9UF04fCk';
-const GID = '0';
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const DEFAULT_CONFIG = {
+  sheetId: '1jidKABEl5hVeu_Iwlqn5oKm1cfBSyvAnPhx9UF04fCk',
+  goal: 50000,
+  gidDm: '0',
+  gidPhone: '',
+  gidCalls: '',
+};
+function loadConfig(){
+  try { return Object.assign({}, DEFAULT_CONFIG, JSON.parse(localStorage.getItem('janier_cfg')||'{}')); }
+  catch(e){ return Object.assign({}, DEFAULT_CONFIG); }
+}
+let CFG = loadConfig();
 
-// --- nav ---
-document.querySelectorAll('.nav-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('page-'+tab.dataset.page).classList.add('active');
-  });
-});
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let DATA = { dm: [], phone: [], calls: [] };
+let currentPeriod = 'all';
+let currentRepView = 'dm';
+let clPage = 1;
+const CL_PAGE_SIZE = 15;
+const charts = {};
 
-let charts = {};
-function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts = {}; }
-
-function fmtMoney(n){ return '$' + Math.round(n).toLocaleString(); }
-function fmtPct(n){ return (Math.round(n*10)/10) + '%'; }
-
-function objectionBadge(v){
-  const m = {'Money':'badge-red','Other':'badge-amber','None':'badge-grey'};
-  return m[v] || 'badge-grey';
+// ═══════════════════════════════════════════════
+// DATE UTILS
+// ═══════════════════════════════════════════════
+function parseDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const s = String(d).split('T')[0].trim();
+  if (s.includes('/')) {
+    const parts = s.split('/');
+    const m = parseInt(parts[0]), day = parseInt(parts[1]);
+    let y = parseInt(parts[2]);
+    if (y < 100) y += 2000;
+    return new Date(y, m - 1, day);
+  }
+  if (s.includes('-')) {
+    const parts = s.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  }
+  return null;
+}
+function getWeekRange() {
+  const now = new Date();
+  const day = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((day + 6) % 7));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  mon.setHours(0,0,0,0); sun.setHours(23,59,59,999);
+  return [mon, sun];
+}
+function getMonthRange() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  return [start, end];
+}
+function inPeriod(date) {
+  const d = parseDate(date);
+  if (!d) return false;
+  if (currentPeriod === 'all') return true;
+  if (currentPeriod === 'week') { const [a,b] = getWeekRange(); return d >= a && d <= b; }
+  if (currentPeriod === 'month') { const [a,b] = getMonthRange(); return d >= a && d <= b; }
+  return false;
+}
+function getFilteredData() {
+  return {
+    dm: DATA.dm.filter(r => inPeriod(r.date)),
+    phone: DATA.phone.filter(r => inPeriod(r.date)),
+    calls: DATA.calls.filter(r => inPeriod(r.date))
+  };
 }
 
-function render(rows){
-  // rows: {name,date,leadsContacted,qualified,sets,booked,live,closes,downsells,cash,totalRevenue,rate,objection,notes}
-  rows.sort((a,b)=> a.date - b.date);
-
-  const sum = key => rows.reduce((s,r)=>s+r[key],0);
-  const totalLeads = sum('leadsContacted');
-  const totalQualified = sum('qualified');
-  const totalSets = sum('sets');
-  const totalBooked = sum('booked');
-  const totalLive = sum('live');
-  const totalCloses = sum('closes');
-  const totalDownsells = sum('downsells');
-  const totalCash = sum('cash');
-  const totalRevenue = sum('totalRevenue');
-  const avgRate = rows.length ? (sum('rate')/rows.length) : 0;
-  const setRate = totalLeads ? (totalSets/totalLeads*100) : 0;
-  const showRate = totalBooked ? (totalLive/totalBooked*100) : 0;
-  const closeRate = totalLive ? (totalCloses/totalLive*100) : 0;
-
-  // ---------- PIPELINE / FUNNEL ----------
-  document.getElementById('pipelineKpis').innerHTML = `
-    <div class="kpi-card" style="border-top-color:var(--violet)">
-      <div class="kpi-label">Leads Contacted</div>
-      <div class="kpi-value">${totalLeads.toLocaleString()}</div>
-      <div class="kpi-sub">${rows.length} logged days</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--cyan)">
-      <div class="kpi-label">Qualified Convos</div>
-      <div class="kpi-value">${totalQualified.toLocaleString()}</div>
-      <div class="kpi-sub">${fmtPct(totalLeads?totalQualified/totalLeads*100:0)} of contacted</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--green)">
-      <div class="kpi-label">Set Rate</div>
-      <div class="kpi-value">${fmtPct(setRate)}</div>
-      <div class="kpi-sub">${totalSets} sets / ${totalLeads} contacted</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--amber)">
-      <div class="kpi-label">Show Rate</div>
-      <div class="kpi-value">${fmtPct(showRate)}</div>
-      <div class="kpi-sub">${totalLive} live / ${totalBooked} booked</div>
-    </div>
-  `;
-
-  document.getElementById('dealsBody').innerHTML = rows.slice().reverse().map(r=>`
-    <tr><td class="mono">${r.dateStr}</td><td>${r.name}</td>
-    <td class="mono">${r.leadsContacted}</td><td class="mono">${r.qualified}</td>
-    <td class="mono">${r.sets}</td><td class="mono">${r.booked}</td>
-    <td class="mono">${r.live}</td><td class="mono">${r.closes}</td></tr>
-  `).join('');
-
-  charts.stage = new Chart(document.getElementById('chartStage'), {
-    type:'bar',
-    data:{
-      labels:['Contacted','Qualified','Sets','Booked','Live Calls','Closes'],
-      datasets:[{data:[totalLeads,totalQualified,totalSets,totalBooked,totalLive,totalCloses],
-        backgroundColor:['#8b5cf6','#a78bfa','#22d3ee','#fbbf24','#f472b6','#34d399'],borderRadius:6}]
-    },
-    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
-  });
-
-  charts.flow = new Chart(document.getElementById('chartFlow'), {
-    type:'line',
-    data:{
-      labels:rows.map(r=>r.dateStr),
-      datasets:[
-        {label:'Leads Contacted',data:rows.map(r=>r.leadsContacted),borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',tension:.35,fill:true},
-        {label:'Qualified Convos',data:rows.map(r=>r.qualified),borderColor:'#22d3ee',backgroundColor:'rgba(34,211,238,.12)',tension:.35,fill:true},
-      ]
-    },
-    options:{plugins:{legend:{labels:{boxWidth:10}}},scales:{y:{grid:{color:'#1b1d2c'}},x:{grid:{display:false}}}}
-  });
-
-  // ---------- PERFORMANCE ----------
-  const bestRate = rows.reduce((m,r)=>Math.max(m,r.rate),0);
-  const bestDay = rows.slice().sort((a,b)=>b.qualified-a.qualified)[0];
-
-  document.getElementById('performanceKpis').innerHTML = `
-    <div class="kpi-card" style="border-top-color:var(--violet)">
-      <div class="kpi-label">Avg Self-Rating</div>
-      <div class="kpi-value">${avgRate.toFixed(1)}/10</div>
-      <div class="kpi-sub">across ${rows.length} days</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--cyan)">
-      <div class="kpi-label">Total Closes</div>
-      <div class="kpi-value">${totalCloses}</div>
-      <div class="kpi-sub">${fmtPct(closeRate)} of live calls</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--pink)">
-      <div class="kpi-label">Downsells</div>
-      <div class="kpi-value">${totalDownsells}</div>
-      <div class="kpi-sub">secondary offer closes</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--green)">
-      <div class="kpi-label">Best Day</div>
-      <div class="kpi-value" style="font-size:18px">${bestDay ? bestDay.dateStr : '—'}</div>
-      <div class="kpi-sub">${bestDay ? bestDay.qualified+' qualified convos' : ''}</div>
-    </div>
-  `;
-
-  charts.quota = new Chart(document.getElementById('chartQuota'), {
-    type:'line',
-    data:{labels:rows.map(r=>r.dateStr),datasets:[{label:'Rate',data:rows.map(r=>r.rate),borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',tension:.3,fill:true}]},
-    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'},min:0,max:10},x:{grid:{display:false}}}}
-  });
-
-  charts.activity = new Chart(document.getElementById('chartActivity'), {
-    type:'doughnut',
-    data:{labels:['Leads Contacted','Qualified Convos','Sets'],datasets:[{data:[totalLeads,totalQualified,totalSets],backgroundColor:['#8b5cf6','#22d3ee','#f472b6']}]},
-    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}},cutout:'65%'}
-  });
-
-  const ranked = rows.slice().sort((a,b)=>b.qualified-a.qualified).slice(0,8);
-  document.getElementById('leaderBody').innerHTML = ranked.map((r,i)=>`
-    <tr><td><span class="rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span></td>
-    <td class="mono">${r.dateStr}</td>
-    <td><span class="rep-row"><span class="avatar">${r.name.slice(0,2).toUpperCase()}</span>${r.name}</span></td>
-    <td class="mono">${r.leadsContacted}</td><td class="mono">${r.qualified}</td><td class="mono">${r.sets}</td><td class="mono">${r.rate}/10</td></tr>
-  `).join('');
-
-  // ---------- REVENUE ----------
-  const avgDeal = totalCloses ? (totalCash/totalCloses) : 0;
-  document.getElementById('revenueKpis').innerHTML = `
-    <div class="kpi-card" style="border-top-color:var(--violet)">
-      <div class="kpi-label">Cash Collected</div>
-      <div class="kpi-value">${fmtMoney(totalCash)}</div>
-      <div class="kpi-sub">period to date</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--cyan)">
-      <div class="kpi-label">Total Revenue Logged</div>
-      <div class="kpi-value">${fmtMoney(totalRevenue)}</div>
-      <div class="kpi-sub">contract value</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--amber)">
-      <div class="kpi-label">Total Closes</div>
-      <div class="kpi-value">${totalCloses}</div>
-      <div class="kpi-sub">+ ${totalDownsells} downsells</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--green)">
-      <div class="kpi-label">Avg Cash / Close</div>
-      <div class="kpi-value">${fmtMoney(avgDeal)}</div>
-      <div class="kpi-sub">cash collected basis</div>
-    </div>
-  `;
-
-  charts.revenue = new Chart(document.getElementById('chartRevenue'), {
-    type:'bar',
-    data:{labels:rows.map(r=>r.dateStr),datasets:[{label:'Cash Collected',data:rows.map(r=>r.cash),backgroundColor:'#8b5cf6',borderRadius:6}]},
-    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1b1d2c'},ticks:{callback:v=>'$'+v}},x:{grid:{display:false}}}}
-  });
-
-  charts.product = new Chart(document.getElementById('chartProduct'), {
-    type:'pie',
-    data:{labels:['Closes','Downsells'],datasets:[{data:[totalCloses,totalDownsells],backgroundColor:['#8b5cf6','#f472b6']}]},
-    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}
-  });
-
-  document.getElementById('commBody').innerHTML = rows.slice().reverse().filter(r=>r.closes>0||r.downsells>0||r.cash>0).map(r=>`
-    <tr><td class="mono">${r.dateStr}</td><td>${r.name}</td><td class="mono">${r.closes}</td>
-    <td class="mono">${r.downsells}</td><td class="mono">${fmtMoney(r.cash)}</td><td class="mono">${fmtMoney(r.totalRevenue)}</td></tr>
-  `).join('') || '<tr><td colspan="6" style="color:var(--text3)">No closes logged yet</td></tr>';
-
-  // ---------- OBJECTIONS / NOTES ----------
-  const objCounts = {};
-  rows.forEach(r=>{ objCounts[r.objection] = (objCounts[r.objection]||0)+1; });
-  const topObjection = Object.entries(objCounts).sort((a,b)=>b[1]-a[1])[0];
-  const noteworthy = rows.filter(r=>r.notes && r.notes.toLowerCase()!=='none').length;
-
-  document.getElementById('accountsKpis').innerHTML = `
-    <div class="kpi-card" style="border-top-color:var(--violet)">
-      <div class="kpi-label">Days Logged</div>
-      <div class="kpi-value">${rows.length}</div>
-      <div class="kpi-sub">${rows[0]?rows[0].dateStr:''} → ${rows[rows.length-1]?rows[rows.length-1].dateStr:''}</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--amber)">
-      <div class="kpi-label">Top Objection</div>
-      <div class="kpi-value" style="font-size:18px">${topObjection?topObjection[0]:'—'}</div>
-      <div class="kpi-sub">${topObjection?topObjection[1]+' days logged':''}</div>
-    </div>
-    <div class="kpi-card" style="border-top-color:var(--green)">
-      <div class="kpi-label">Days With Notes</div>
-      <div class="kpi-value">${noteworthy}</div>
-      <div class="kpi-sub">of ${rows.length} logged days</div>
-    </div>
-  `;
-
-  document.getElementById('acctBody').innerHTML = rows.slice().reverse().map(r=>`
-    <tr><td class="mono">${r.dateStr}</td><td>${r.name}</td>
-    <td><span class="badge ${objectionBadge(r.objection)}">${r.objection}</span></td>
-    <td class="notes-cell">${r.notes}</td></tr>
-  `).join('');
+// ═══════════════════════════════════════════════
+// FORMAT
+// ═══════════════════════════════════════════════
+function $$(n) { return '$' + Math.round(n||0).toLocaleString(); }
+function pct(n, d) { return !d ? '0%' : (n / d * 100).toFixed(1) + '%'; }
+function num(n) { return Math.round(n||0).toLocaleString(); }
+function fmtDate(d) {
+  const dt = parseDate(d); if (!dt) return d || '—';
+  return (dt.getMonth()+1) + '/' + dt.getDate() + '/' + dt.getFullYear();
 }
 
-function setSync(state, text){
-  const dot = document.getElementById('syncDot');
-  dot.classList.remove('loading','err');
-  if(state==='loading') dot.classList.add('loading');
-  if(state==='err') dot.classList.add('err');
-  document.getElementById('syncText').textContent = text;
-  document.getElementById('errBanner').classList.toggle('show', state==='err');
-}
-
-const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-window.__onSheetData = function(json){
-  try{
-    const table = json.table;
-    const rows = table.rows.map(r=>{
-      const c = r.c;
-      const v = i => c[i] ? c[i].v : null;
-      let dateObj = new Date();
-      const rawDate = v(1);
-      if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
-        const parts = rawDate.slice(5,-1).split(',').map(Number);
-        dateObj = new Date(parts[0], parts[1], parts[2]);
-      }
-      return {
-        name: v(0) || 'Unknown',
-        date: dateObj,
-        dateStr: (MONTHS[dateObj.getMonth()]||'') + ' ' + dateObj.getDate(),
-        leadsContacted: v(2)||0,
-        qualified: v(3)||0,
-        sets: v(4)||0,
-        booked: v(5)||0,
-        live: v(6)||0,
-        closes: v(7)||0,
-        downsells: v(8)||0,
-        cash: v(9)||0,
-        totalRevenue: v(10)||0,
-        rate: v(11)||0,
-        objection: v(12) || 'None',
-        notes: v(13) || 'None',
-      };
-    }).filter(r => r.name && r.name !== 'Unknown' || r.leadsContacted);
-    destroyCharts();
-    render(rows);
-    setSync('ok', 'Synced ' + new Date().toLocaleTimeString());
-  }catch(e){
-    console.error(e);
-    setSync('err', 'Parse error');
+// ═══════════════════════════════════════════════
+// CHART HELPERS
+// ═══════════════════════════════════════════════
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+const chartDefaults = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#9c9cc0', font: { family: "'JetBrains Mono'" } } } },
+  scales: {
+    x: { grid: { color: '#23253a' }, ticks: { color: '#5e5e80', font: { family: "'JetBrains Mono'", size: 10 } } },
+    y: { grid: { color: '#23253a' }, ticks: { color: '#5e5e80', font: { family: "'JetBrains Mono'", size: 10 } } }
   }
 };
 
-function loadSheet(){
-  setSync('loading', 'Loading sheet…');
-  const existing = document.getElementById('sheetScript');
-  if (existing) existing.remove();
-  const script = document.createElement('script');
-  script.id = 'sheetScript';
-  const cb = '__onSheetData';
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${cb}&gid=${GID}&t=${Date.now()}`;
-  script.src = url;
-  script.onerror = () => setSync('err', 'Could not reach sheet');
-  document.body.appendChild(script);
-  setTimeout(() => {
-    if (document.getElementById('syncText').textContent === 'Loading sheet…') {
-      setSync('err', 'Timed out reaching sheet');
-    }
-  }, 8000);
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  [...document.querySelectorAll('.nav-tab')].forEach(t => {
+    if (t.getAttribute('onclick') === `showPage('${name}')`) t.classList.add('active');
+  });
+  renderActivePage();
+}
+function setPeriod(p) {
+  currentPeriod = p;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  [...document.querySelectorAll('.period-btn')].forEach(b => { if (b.getAttribute('onclick') === `setPeriod('${p}')`) b.classList.add('active'); });
+  renderActivePage();
+}
+function renderActivePage() {
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'page-overview') renderOverview();
+  else if (id === 'page-reps') renderReps();
+  else if (id === 'page-calllog') renderCallLog();
+  else if (id === 'page-forecast') renderForecast();
 }
 
-document.getElementById('refreshBtn').addEventListener('click', loadSheet);
-loadSheet();
+// ═══════════════════════════════════════════════
+// PAGE 1: OVERVIEW
+// ═══════════════════════════════════════════════
+function renderOverview() {
+  const { dm, phone, calls } = getFilteredData();
+  const totalCash = calls.reduce((a,c) => a + (Number(c.cash)||0), 0);
+  const totalRev = calls.reduce((a,c) => a + (Number(c.rev)||0), 0);
+  const live = calls.filter(c => !['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
+  const closes = calls.filter(c => c.status === 'Closed').length;
+  const deposits = calls.filter(c => c.status === 'Deposit').length;
+  const noshows = calls.filter(c => c.status === 'No Show').length;
+  const onCal = dm.reduce((a,r)=>a+(Number(r.cal)||0),0) + phone.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const showed = dm.reduce((a,r)=>a+(Number(r.live)||0),0) + phone.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const pending = totalRev - totalCash;
+  const afterFees = totalCash * 0.97;
+  const perCall = live > 0 ? totalCash / live : 0;
+  const closedRevRows = calls.filter(c => c.status === 'Closed');
+  const aov = closedRevRows.length > 0 ? closedRevRows.reduce((a,c)=>a+(Number(c.cash)||0),0) / closedRevRows.length : 0;
+
+  // when there's no closer call log, fall back to setter-logged cash/rev/closes so Overview isn't all zeroes
+  const fallbackCash = dm.reduce((a,r)=>a+(Number(r.cash)||0),0) + phone.reduce((a,r)=>a+(Number(r.cash)||0),0);
+  const fallbackRev  = dm.reduce((a,r)=>a+(Number(r.rev)||0),0) + phone.reduce((a,r)=>a+(Number(r.rev)||0),0);
+  const fallbackCloses = dm.reduce((a,r)=>a+(Number(r.closes)||0),0) + phone.reduce((a,r)=>a+(Number(r.closes)||0),0);
+  const useFallback = calls.length === 0;
+  const dCash = useFallback ? fallbackCash : totalCash;
+  const dRev  = useFallback ? fallbackRev  : totalRev;
+  const dCloses = useFallback ? fallbackCloses : closes;
+
+  document.getElementById('ov-rev').textContent = $$(dRev);
+  document.getElementById('ov-cash').textContent = $$(dCash);
+  document.getElementById('ov-afterfees').textContent = $$(dCash * 0.97);
+  document.getElementById('ov-pending').textContent = $$(dRev - dCash);
+  document.getElementById('ov-percall').textContent = $$(showed > 0 ? dCash / showed : 0);
+  document.getElementById('ov-aov').textContent = $$(dCloses > 0 ? dCash / dCloses : 0);
+  document.getElementById('ov-live').textContent = num(useFallback ? showed : live);
+  document.getElementById('ov-closes').textContent = num(dCloses);
+  document.getElementById('ov-noshows').textContent = num(noshows);
+  document.getElementById('ov-deposits').textContent = num(deposits);
+  document.getElementById('ov-cr').textContent = pct(dCloses, showed);
+  document.getElementById('ov-sr').textContent = pct(showed, onCal);
+  document.getElementById('ov-nsr').textContent = pct(noshows, onCal);
+  document.getElementById('ov-noclose').textContent = num(Math.max(showed - dCloses, 0));
+
+  const goal = Number(CFG.goal) || 50000;
+  document.getElementById('ov-goal-amt').textContent = $$(goal);
+  document.getElementById('ov-goal-amt2').textContent = $$(goal) + ' goal';
+  document.getElementById('fc-need').textContent = $$(goal);
+  const goalPct = Math.min(dCash / goal * 100, 100);
+  document.getElementById('ov-goal-pct').textContent = goalPct.toFixed(1) + '%';
+  document.getElementById('ov-cash-label').textContent = $$(dCash) + ' collected';
+  setTimeout(() => { const el = document.getElementById('goalBar'); if (el) el.style.width = goalPct + '%'; }, 50);
+
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const dayOfMonth = now.getDate();
+  const daysLeft = daysInMonth - dayOfMonth;
+  const expectedByNow = goal / daysInMonth * dayOfMonth;
+  const needed = Math.max(goal - dCash, 0);
+  const dailyNeeded = daysLeft > 0 ? needed / daysLeft : 0;
+  const paceEl = document.getElementById('ov-pace-note');
+  if (dCash >= expectedByNow) {
+    paceEl.style.color = 'var(--green)';
+    paceEl.textContent = `On pace ✓ — need ${$$(dailyNeeded)}/day for ${daysLeft} days`;
+  } else {
+    paceEl.style.color = 'var(--amber)';
+    paceEl.textContent = `Behind pace — need ${$$(dailyNeeded)}/day for ${daysLeft} days`;
+  }
+
+  // Cash by date: use calls if present, else setter cash rows
+  const dateMap = {};
+  if (calls.length) {
+    calls.forEach(c => { const d = fmtDate(c.date); dateMap[d] = (dateMap[d]||0) + (Number(c.cash)||0); });
+  } else {
+    [...dm, ...phone].forEach(r => { const d = fmtDate(r.date); dateMap[d] = (dateMap[d]||0) + (Number(r.cash)||0); });
+  }
+  const dates = Object.keys(dateMap).sort((a,b) => parseDate(a) - parseDate(b));
+  destroyChart('chartCashDate');
+  const cdCtx = document.getElementById('chartCashDate');
+  if (cdCtx) charts['chartCashDate'] = new Chart(cdCtx, {
+    type:'bar',
+    data:{ labels: dates, datasets: [{ label:'Cash', data: dates.map(d=>dateMap[d]), backgroundColor:'rgba(34,211,238,.5)', borderColor:'#22d3ee', borderWidth:1, borderRadius:4 }] },
+    options: { ...chartDefaults, plugins: { legend: { display:false } } }
+  });
+
+  destroyChart('chartOutcomes');
+  const ocCtx = document.getElementById('chartOutcomes');
+  if (ocCtx) {
+    if (calls.length) {
+      const statusCounts = {};
+      calls.forEach(c => { statusCounts[c.status] = (statusCounts[c.status]||0) + 1; });
+      const statusColors = { Closed:'#34d399', Deposit:'#fbbf24', 'Follow Up':'#22d3ee', 'No Show':'#fb7185', Lost:'#fb7185', 'Bad Fit':'#fb923c', DQ:'#5e5e80', IGNORE:'#5e5e80', Cancelled:'#5e5e80' };
+      const labels = Object.keys(statusCounts);
+      charts['chartOutcomes'] = new Chart(ocCtx, {
+        type:'doughnut',
+        data:{ labels, datasets:[{ data: labels.map(l=>statusCounts[l]), backgroundColor: labels.map(l=>statusColors[l]||'#5e5e80'), borderWidth:0 }] },
+        options: { plugins: { legend: { position:'right', labels: { color:'#9c9cc0', font: { family:"'JetBrains Mono'", size:11 }, padding:12 } } } }
+      });
+    } else {
+      charts['chartOutcomes'] = new Chart(ocCtx, {
+        type:'doughnut',
+        data:{ labels:['Qualified','Not Yet Qualified'], datasets:[{ data:[dm.reduce((a,r)=>a+(Number(r.qualified)||0),0), Math.max(dm.reduce((a,r)=>a+(Number(r.leads)||0),0)-dm.reduce((a,r)=>a+(Number(r.qualified)||0),0),0)], backgroundColor:['#8b5cf6','#23253a'], borderWidth:0 }] },
+        options: { plugins: { legend: { position:'right', labels: { color:'#9c9cc0', font: { family:"'JetBrains Mono'", size:11 }, padding:12 } } } }
+      });
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PAGE 2: REPS
+// ═══════════════════════════════════════════════
+function renderReps() {
+  const { dm, phone, calls } = getFilteredData();
+  renderRepPillToggle(dm, phone, calls);
+  renderLeaderboard(dm, phone, calls);
+  renderRepIndividual(dm, phone);
+  renderRepComparison(dm, phone);
+}
+
+function renderRepPillToggle(dm, phone, calls){
+  const closers = [...new Set(calls.map(c=>c.closer).filter(Boolean))];
+  const closerName = closers[0] || 'Closer';
+  const dmName = (dm[0] && dm[0].name) || 'DM Setter';
+  const phoneName = (phone[0] && phone[0].name) || 'Phone Setter';
+  const el = document.getElementById('rep-pill-toggle');
+  el.innerHTML = `
+    <button class="pill-btn ${currentRepView==='dm'?'active':''}" onclick="setRepView('dm')">${dmName} (DM)</button>
+    <button class="pill-btn ${currentRepView==='phone'?'active':''}" onclick="setRepView('phone')">${phoneName} (Phone)</button>
+    <button class="pill-btn ${currentRepView==='closer'?'active':''}" onclick="setRepView('closer')">${closerName} (Closer)</button>
+  `;
+}
+function setRepView(v){ currentRepView = v; renderReps(); }
+
+function renderLeaderboard(dm, phone, calls) {
+  const dmCash = dm.reduce((a,r)=>a+(Number(r.cash)||0),0);
+  const dmRev  = dm.reduce((a,r)=>a+(Number(r.rev)||0),0);
+  const dmLeads= dm.reduce((a,r)=>a+(Number(r.leads)||0),0);
+  const dmClose= dm.reduce((a,r)=>a+(Number(r.closes)||0),0);
+  const dmLive = dm.reduce((a,r)=>a+(Number(r.live)||0),0);
+
+  const phCash = phone.reduce((a,r)=>a+(Number(r.cash)||0),0);
+  const phRev  = phone.reduce((a,r)=>a+(Number(r.rev)||0),0);
+  const phDials= phone.reduce((a,r)=>a+(Number(r.dials)||0),0);
+  const phClose= phone.reduce((a,r)=>a+(Number(r.closes)||0),0);
+  const phLive = phone.reduce((a,r)=>a+(Number(r.live)||0),0);
+
+  const closerCash = calls.reduce((a,c)=>a+(Number(c.cash)||0),0);
+  const closerRev  = calls.reduce((a,c)=>a+(Number(c.rev)||0),0);
+  const closerCloses = calls.filter(c=>c.status==='Closed').length;
+  const closerLive = calls.filter(c=>!['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
+  const closers = [...new Set(calls.map(c=>c.closer).filter(Boolean))];
+
+  const people = [
+    { name: closers[0] || 'Closer (no data yet)', role:'Closer', cash:closerCash, rev:closerRev, metric:num(closerCloses), metricLabel:'Closes', cr:pct(closerCloses, closerLive), avatar:'CL', color:'var(--green)', empty: calls.length===0 },
+    { name: (phone[0]&&phone[0].name) || 'Phone Setter (no data yet)', role:'Phone Setter', cash:phCash, rev:phRev, metric:num(phDials), metricLabel:'Dials', cr:pct(phClose, phLive), avatar:'PS', color:'var(--cyan)', empty: phone.length===0 },
+    { name: (dm[0]&&dm[0].name) || 'DM Setter (no data yet)', role:'DM Setter', cash:dmCash, rev:dmRev, metric:num(dmLeads), metricLabel:'Leads', cr:pct(dmClose, dmLive), avatar:'DM', color:'var(--violet)', empty: dm.length===0 },
+  ].sort((a,b) => b.cash - a.cash);
+
+  const ranks = ['🥇','🥈','🥉'];
+  const el = document.getElementById('leaderboard');
+  el.innerHTML = people.map((p,i) => `
+    <div class="lb-row" style="${p.empty?'opacity:.5':''}">
+      <div class="lb-rank">${ranks[i]}</div>
+      <div class="lb-avatar" style="background:${p.color}22;color:${p.color}">${p.avatar}</div>
+      <div class="lb-info">
+        <div class="lb-name">${p.name}</div>
+        <div class="lb-role">${p.role}</div>
+      </div>
+      <div class="lb-stats">
+        <div class="lb-stat"><div class="lb-stat-val text-cyan">${$$(p.cash)}</div><div class="lb-stat-label">Cash</div></div>
+        <div class="lb-stat"><div class="lb-stat-val text-green">${$$(p.rev)}</div><div class="lb-stat-label">Revenue</div></div>
+        <div class="lb-stat"><div class="lb-stat-val">${p.metric}</div><div class="lb-stat-label">${p.metricLabel}</div></div>
+        <div class="lb-stat"><div class="lb-stat-val">${p.cr}</div><div class="lb-stat-label">Close Rate</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function kc(label, value, color) {
+  return `<div class="kpi-card" style="border-top-color:${color}">
+    <div class="kpi-label">${label}</div>
+    <div class="kpi-value mono" style="color:${color};font-size:18px">${value}</div>
+  </div>`;
+}
+
+function renderRepIndividual(dm, phone) {
+  const statsEl = document.getElementById('rep-stats');
+  const tableEl = document.getElementById('rep-table');
+  const funnelEl = document.getElementById('rep-funnel');
+
+  if (currentRepView === 'closer') {
+    const { calls } = getFilteredData();
+    if (!calls.length) {
+      statsEl.innerHTML = `<div class="empty-state">No Closer Call Log tab connected yet. Add one and set its gid on the <b>Setup</b> page to see closer stats here.</div>`;
+      tableEl.innerHTML = ''; funnelEl.innerHTML = '';
+      renderSetsChart([], []);
+      return;
+    }
+    const cash = calls.reduce((a,c)=>a+(Number(c.cash)||0),0);
+    const rev = calls.reduce((a,c)=>a+(Number(c.rev)||0),0);
+    const closes = calls.filter(c=>c.status==='Closed').length;
+    const live = calls.filter(c=>!['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
+    statsEl.innerHTML = `<div class="grid-4">
+      ${kc('Calls Taken', num(calls.length), 'var(--cyan)')}
+      ${kc('Closes', num(closes), 'var(--green)')}
+      ${kc('Cash Collected', $$(cash), 'var(--cyan)')}
+      ${kc('Close Rate', pct(closes, live), 'var(--violet)')}
+    </div>`;
+    funnelEl.innerHTML = '';
+    tableEl.innerHTML = `<table><thead><tr><th>Date</th><th>Email</th><th>Status</th><th>Cash</th></tr></thead>
+      <tbody>${calls.slice(0,12).map(c=>`<tr><td class="mono">${fmtDate(c.date)}</td><td>${c.email||'—'}</td><td>${c.status||'—'}</td><td class="mono">${$$(c.cash)}</td></tr>`).join('')}</tbody></table>`;
+    renderSetsChart(calls.map(c=>fmtDate(c.date)), calls.map(c=>c.status==='Closed'?1:0), 'Closes');
+    return;
+  }
+
+  if (currentRepView === 'phone') {
+    if (!phone.length) {
+      statsEl.innerHTML = `<div class="empty-state">No Phone Setter tab connected yet. Add one and set its gid on the <b>Setup</b> page to see phone-setter stats here.</div>`;
+      tableEl.innerHTML = ''; funnelEl.innerHTML = '';
+      renderSetsChart([], []);
+      return;
+    }
+    const data = phone;
+    const dials = data.reduce((a,r)=>a+(Number(r.dials)||0),0);
+    const conns = data.reduce((a,r)=>a+(Number(r.connections)||0),0);
+    const convos= data.reduce((a,r)=>a+(Number(r.qualified)||0),0);
+    const sets  = data.reduce((a,r)=>a+(Number(r.sets)||0),0);
+    const cal   = data.reduce((a,r)=>a+(Number(r.cal)||0),0);
+    const live  = data.reduce((a,r)=>a+(Number(r.live)||0),0);
+    const closes= data.reduce((a,r)=>a+(Number(r.closes)||0),0);
+    const ds    = data.reduce((a,r)=>a+(Number(r.downsells)||0),0);
+    const cash  = data.reduce((a,r)=>a+(Number(r.cash)||0),0);
+    const rev   = data.reduce((a,r)=>a+(Number(r.rev)||0),0);
+
+    statsEl.innerHTML = `
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('Total Dials',num(dials),'var(--cyan)')}
+        ${kc('Connections',num(conns),'var(--violet)')}
+        ${kc('Qualified Convos',num(convos),'var(--green)')}
+        ${kc('Appointments Set',num(sets),'var(--amber)')}
+        ${kc('Cash Collected',$$(cash),'var(--cyan)')}
+      </div>
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('On Calendar',num(cal),'var(--pink)')}
+        ${kc('Calls Showed',num(live),'var(--green)')}
+        ${kc('Total Closes',num(closes),'var(--green)')}
+        ${kc('Downsells',num(ds),'var(--orange)')}
+        ${kc('Revenue Generated',$$(rev),'var(--green)')}
+      </div>
+      <div class="grid-5">
+        ${kc('Show Rate',pct(live,cal),'var(--violet)')}
+        ${kc('Close Rate',pct(closes,live),'var(--green)')}
+        ${kc('Pickup Rate',pct(conns,dials),'var(--cyan)')}
+        ${kc('Qualified Rate',pct(convos,conns),'var(--amber)')}
+        ${kc('Set Rate',pct(sets,conns),'var(--pink)')}
+      </div>`;
+
+    renderFunnel([
+      {label:'Dials',val:dials},{label:'Connections',val:conns},{label:'Convos',val:convos},
+      {label:'Sets',val:sets},{label:'On Cal',val:cal},{label:'Showed',val:live},
+    ]);
+    renderRepTable(['Date','Dials','Conns','Convos','Sets','Cal','Live','Closes','DS','Cash','Rev','Rating'],
+      data.map(r => [fmtDate(r.date),r.dials,r.connections,r.qualified,r.sets,r.cal,r.live,r.closes,r.downsells,$$(r.cash),$$(r.rev),r.rating]));
+    renderSetsChart(data.map(r=>fmtDate(r.date)), data.map(r=>Number(r.sets)||0));
+    return;
+  }
+
+  // DM setter (default / always has data from the live sheet)
+  const data = dm;
+  if (!data.length) {
+    statsEl.innerHTML = `<div class="empty-state">No DM Setter data for this period.</div>`;
+    tableEl.innerHTML = ''; funnelEl.innerHTML = '';
+    renderSetsChart([], []);
+    return;
+  }
+  const leads = data.reduce((a,r)=>a+(Number(r.leads)||0),0);
+  const convos= data.reduce((a,r)=>a+(Number(r.qualified)||0),0);
+  const sets  = data.reduce((a,r)=>a+(Number(r.sets)||0),0);
+  const cal   = data.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const live  = data.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const closes= data.reduce((a,r)=>a+(Number(r.closes)||0),0);
+  const ds    = data.reduce((a,r)=>a+(Number(r.downsells)||0),0);
+  const cash  = data.reduce((a,r)=>a+(Number(r.cash)||0),0);
+  const rev   = data.reduce((a,r)=>a+(Number(r.rev)||0),0);
+
+  statsEl.innerHTML = `
+    <div class="grid-5" style="margin-bottom:10px">
+      ${kc('Leads Contacted',num(leads),'var(--cyan)')}
+      ${kc('Qualified Convos',num(convos),'var(--violet)')}
+      ${kc('Appointments Set',num(sets),'var(--green)')}
+      ${kc('On Calendar',num(cal),'var(--amber)')}
+      ${kc('Cash Collected',$$(cash),'var(--cyan)')}
+    </div>
+    <div class="grid-4" style="margin-bottom:10px">
+      ${kc('Calls Showed',num(live),'var(--green)')}
+      ${kc('Total Closes',num(closes),'var(--green)')}
+      ${kc('Downsells',num(ds),'var(--orange)')}
+      ${kc('Revenue Generated',$$(rev),'var(--green)')}
+    </div>
+    <div class="grid-4">
+      ${kc('Show Rate',pct(live,cal),'var(--violet)')}
+      ${kc('Close Rate',pct(closes,live),'var(--green)')}
+      ${kc('Qualified Rate',pct(convos,leads),'var(--amber)')}
+      ${kc('Set Rate',pct(sets,convos),'var(--pink)')}
+    </div>`;
+
+  renderFunnel([
+    {label:'Leads',val:leads},{label:'Convos',val:convos},{label:'Sets',val:sets},
+    {label:'On Cal',val:cal},{label:'Showed',val:live},
+  ]);
+  renderRepTable(['Date','Leads','Convos','Sets','Cal','Live','Closes','DS','Cash','Rev','Rating'],
+    data.map(r => [fmtDate(r.date),r.leads,r.qualified,r.sets,r.cal,r.live,r.closes,r.downsells,$$(r.cash),$$(r.rev),r.rating]));
+  renderSetsChart(data.map(r=>fmtDate(r.date)), data.map(r=>Number(r.sets)||0));
+}
+
+function renderFunnel(steps) {
+  const top = steps[0].val || 1;
+  const colors = ['var(--cyan)','var(--violet)','var(--green)','var(--amber)','var(--pink)','var(--orange)'];
+  const el = document.getElementById('rep-funnel');
+  el.innerHTML = steps.map((s,i) => {
+    const w = Math.round(s.val / top * 100);
+    const drop = i > 0 && steps[i-1].val > 0 ? pct(s.val, steps[i-1].val) : '—';
+    return `<div class="funnel-step">
+      <div class="funnel-label">${s.label}</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${w}%;background:${colors[i]}22;color:${colors[i]}">${num(s.val)}</div></div>
+      <div class="funnel-pct">${drop}</div>
+    </div>`;
+  }).join('');
+}
+function renderRepTable(headers, rows) {
+  const el = document.getElementById('rep-table');
+  el.innerHTML = `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c===0?0:(c||'—')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function renderSetsChart(labels, data, label) {
+  destroyChart('chartSetsDay');
+  const ctx = document.getElementById('chartSetsDay');
+  if (!ctx) return;
+  charts['chartSetsDay'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label: label||'Sets', data, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,.12)', fill:true, tension:0.3, pointRadius:4, pointBackgroundColor:'#34d399' }] },
+    options: { ...chartDefaults, plugins: { legend: { display:false } } }
+  });
+}
+
+function renderRepComparison(dm, phone) {
+  const dLeads = dm.reduce((a,r)=>a+(Number(r.leads)||0),0);
+  const dConvos= dm.reduce((a,r)=>a+(Number(r.qualified)||0),0);
+  const dSets  = dm.reduce((a,r)=>a+(Number(r.sets)||0),0);
+  const dCal   = dm.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const dLive  = dm.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const dClose = dm.reduce((a,r)=>a+(Number(r.closes)||0),0);
+
+  const pDials = phone.reduce((a,r)=>a+(Number(r.dials)||0),0);
+  const pConns = phone.reduce((a,r)=>a+(Number(r.connections)||0),0);
+  const pConvos= phone.reduce((a,r)=>a+(Number(r.qualified)||0),0);
+  const pSets  = phone.reduce((a,r)=>a+(Number(r.sets)||0),0);
+  const pCal   = phone.reduce((a,r)=>a+(Number(r.cal)||0),0);
+  const pLive  = phone.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const pClose = phone.reduce((a,r)=>a+(Number(r.closes)||0),0);
+
+  const labels = ['Contacted','Connections','Convos','Sets','On Cal','Showed','Closes'];
+  const dData  = [dLeads, 0, dConvos, dSets, dCal, dLive, dClose];
+  const pData  = [pDials, pConns, pConvos, pSets, pCal, pLive, pClose];
+
+  destroyChart('chartSetterComp');
+  const ctx = document.getElementById('chartSetterComp');
+  if (!ctx) return;
+  charts['chartSetterComp'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label:(dm[0]&&dm[0].name)||'DM Setter', data:dData, backgroundColor:'rgba(139,92,246,.5)', borderColor:'#8b5cf6', borderWidth:1, borderRadius:4 },
+      { label:(phone[0]&&phone[0].name)||'Phone Setter', data:pData, backgroundColor:'rgba(34,211,238,.5)', borderColor:'#22d3ee', borderWidth:1, borderRadius:4 },
+    ]},
+    options: { ...chartDefaults }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// PAGE 3: CALL LOG
+// ═══════════════════════════════════════════════
+function renderCallLog() {
+  const { calls } = getFilteredData();
+  const search = document.getElementById('cl-search').value.toLowerCase();
+  const status = document.getElementById('cl-status').value;
+  const sort   = document.getElementById('cl-sort').value;
+
+  if (!calls.length) {
+    document.getElementById('cl-rev').textContent = '$0';
+    document.getElementById('cl-cash').textContent = '$0';
+    document.getElementById('cl-cr').textContent = '0%';
+    document.getElementById('calllog-table').innerHTML = `<div class="empty-state">No Closer Call Log tab connected yet. Add one with columns Closer/Date/Email/Summary/Offer/Status/Cash Collected/Total Revenue/Recording, then set its gid on the <b>Setup</b> page.</div>`;
+    document.getElementById('cl-pagination').innerHTML = '';
+    return;
+  }
+
+  let filtered = calls.filter(c => {
+    const matchSearch = !search || [c.email,c.status,c.summary,c.offer].join(' ').toLowerCase().includes(search);
+    const matchStatus = !status || c.status === status;
+    return matchSearch && matchStatus;
+  });
+
+  if (sort === 'date-desc') filtered.sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+  else if (sort === 'date-asc') filtered.sort((a,b)=>parseDate(a.date)-parseDate(b.date));
+  else if (sort === 'cash-desc') filtered.sort((a,b)=>Number(b.cash)-Number(a.cash));
+  else if (sort === 'cash-asc') filtered.sort((a,b)=>Number(a.cash)-Number(b.cash));
+
+  const fRev  = filtered.reduce((a,c)=>a+(Number(c.rev)||0),0);
+  const fCash = filtered.reduce((a,c)=>a+(Number(c.cash)||0),0);
+  const fClose= filtered.filter(c=>c.status==='Closed').length;
+  const fLive = filtered.filter(c=>!['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
+  document.getElementById('cl-rev').textContent = $$(fRev);
+  document.getElementById('cl-cash').textContent = $$(fCash);
+  document.getElementById('cl-cr').textContent = pct(fClose, fLive);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / CL_PAGE_SIZE));
+  if (clPage > totalPages) clPage = 1;
+  const start = (clPage - 1) * CL_PAGE_SIZE;
+  const page  = filtered.slice(start, start + CL_PAGE_SIZE);
+
+  const badgeMap = { Closed:'badge-green', Deposit:'badge-amber', 'Follow Up':'badge-cyan', 'No Show':'badge-red', Lost:'badge-red', 'Bad Fit':'badge-orange', DQ:'badge-grey', IGNORE:'badge-grey', Cancelled:'badge-grey' };
+
+  document.getElementById('calllog-table').innerHTML = `<table>
+    <thead><tr><th>Date</th><th>Lead</th><th>Status</th><th>Cash</th><th>Revenue</th><th>Recording</th><th>Notes</th></tr></thead>
+    <tbody>${page.map(c=>`<tr>
+      <td class="mono">${fmtDate(c.date)}</td>
+      <td>${c.email||'—'}</td>
+      <td><span class="badge ${badgeMap[c.status]||'badge-grey'}">${c.status||'—'}</span></td>
+      <td class="mono text-cyan">${$$(Number(c.cash)||0)}</td>
+      <td class="mono text-green">${$$(Number(c.rev)||0)}</td>
+      <td>${c.recording ? `<a href="${c.recording}" target="_blank" style="color:var(--violet);text-decoration:none">▶ Watch</a>` : '—'}</td>
+      <td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis">${c.summary||'—'}</td>
+    </tr>`).join('')}</tbody></table>`;
+
+  const pg = document.getElementById('cl-pagination');
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+  let btns = '';
+  btns += `<button class="page-btn" onclick="clGoPage(${clPage-1})" ${clPage===1?'disabled':''}>‹ Prev</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - clPage) <= 1) {
+      btns += `<button class="page-btn ${i===clPage?'active':''}" onclick="clGoPage(${i})">${i}</button>`;
+    } else if (Math.abs(i - clPage) === 2) {
+      btns += `<span style="color:var(--text3);padding:0 4px">…</span>`;
+    }
+  }
+  btns += `<button class="page-btn" onclick="clGoPage(${clPage+1})" ${clPage===totalPages?'disabled':''}>Next ›</button>`;
+  pg.innerHTML = btns;
+}
+function clGoPage(p) {
+  const { calls } = getFilteredData();
+  const total = Math.ceil(calls.length / CL_PAGE_SIZE);
+  clPage = Math.max(1, Math.min(p, total));
+  renderCallLog();
+}
+
+// ═══════════════════════════════════════════════
+// PAGE 4: FORECAST
+// ═══════════════════════════════════════════════
+function renderForecast() {
+  const { dm, phone, calls } = getFilteredData();
+  const goal = Number(CFG.goal) || 50000;
+  const useFallback = calls.length === 0;
+  const totalCash = useFallback ? (dm.reduce((a,r)=>a+(Number(r.cash)||0),0) + phone.reduce((a,r)=>a+(Number(r.cash)||0),0)) : calls.reduce((a,c)=>a+(Number(c.cash)||0),0);
+  const closes = useFallback ? (dm.reduce((a,r)=>a+(Number(r.closes)||0),0) + phone.reduce((a,r)=>a+(Number(r.closes)||0),0)) : calls.filter(c=>c.status==='Closed').length;
+  const showed = dm.reduce((a,r)=>a+(Number(r.live)||0),0) + phone.reduce((a,r)=>a+(Number(r.live)||0),0);
+  const onCal  = dm.reduce((a,r)=>a+(Number(r.cal)||0),0) + phone.reduce((a,r)=>a+(Number(r.cal)||0),0);
+
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const dayOfMonth  = now.getDate();
+  const daysLeft    = daysInMonth - dayOfMonth;
+
+  const needed   = Math.max(goal - totalCash, 0);
+  const dailyRate= daysLeft > 0 ? needed / daysLeft : 0;
+  const dailyCash= dayOfMonth > 0 ? totalCash / dayOfMonth : 0;
+  const projected= dailyCash * daysInMonth;
+
+  const closeRate= showed > 0 ? closes / showed : 0;
+  const showRate = onCal  > 0 ? showed / onCal  : 0;
+  const avgDeal  = closes > 0 ? totalCash / closes : 0;
+  const closesNeeded = avgDeal > 0 ? Math.ceil(needed / avgDeal) : '—';
+  const callsNeeded  = closeRate > 0 && typeof closesNeeded === 'number' ? Math.ceil(closesNeeded / closeRate) : '—';
+  const setsNeeded   = showRate  > 0 && typeof callsNeeded  === 'number' ? Math.ceil(callsNeeded  / showRate)  : '—';
+  const expectedPace = goal / daysInMonth * dayOfMonth;
+  const vsPace       = totalCash - expectedPace;
+
+  document.getElementById('fc-cash').textContent = $$(totalCash);
+  document.getElementById('fc-need').textContent = $$(needed);
+  document.getElementById('fc-rate').textContent = $$(dailyRate);
+  document.getElementById('fc-proj').textContent = $$(projected);
+  const projCard = document.getElementById('fc-proj-card');
+  projCard.style.borderTopColor = projected >= goal ? 'var(--green)' : 'var(--red)';
+  document.getElementById('fc-proj').style.color = projected >= goal ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('fc-days-left').textContent = daysLeft;
+  document.getElementById('fc-deal').textContent = $$(avgDeal);
+  document.getElementById('fc-cr').textContent = pct(closes, showed);
+  document.getElementById('fc-show').textContent = pct(showed, onCal);
+  document.getElementById('fc-closes-need').textContent = closesNeeded;
+  document.getElementById('fc-calls-need').textContent = callsNeeded;
+  document.getElementById('fc-sets-need').textContent = setsNeeded;
+  const vpEl = document.getElementById('fc-vs-pace');
+  vpEl.textContent = (vsPace >= 0 ? '+' : '') + $$(vsPace);
+  vpEl.style.color = vsPace >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const dailyMap = {};
+  const cashRows = useFallback ? [...dm, ...phone] : calls;
+  cashRows.forEach(c => {
+    const d = parseDate(c.date);
+    if (!d) return;
+    const key = d.getDate();
+    dailyMap[key] = (dailyMap[key]||0) + (Number(c.cash)||0);
+  });
+  const days = Array.from({length:daysInMonth}, (_,i)=>i+1);
+  let running = 0;
+  const actualLine = days.map(d => {
+    if (d <= dayOfMonth) { running += (dailyMap[d]||0); return running; }
+    return null;
+  });
+  const goalLine = days.map(d => goal / daysInMonth * d);
+
+  destroyChart('chartCumulative');
+  const ctx1 = document.getElementById('chartCumulative');
+  if (ctx1) charts['chartCumulative'] = new Chart(ctx1, {
+    type: 'line',
+    data: { labels: days.map(d=>'D'+d), datasets: [
+      { label:'Cash Collected', data:actualLine, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,.08)', fill:true, tension:0.3, pointRadius:2 },
+      { label:'Goal Pace', data:goalLine, borderColor:'#5e5e80', borderDash:[6,4], borderWidth:1.5, fill:false, pointRadius:0 }
+    ]},
+    options: { ...chartDefaults }
+  });
+
+  const closedRows = useFallback ? cashRows.filter(r=>(Number(r.closes)||0)>0) : calls.filter(c => c.status === 'Closed' && (Number(c.cash)||0) > 0);
+  const rvLabels = useFallback ? closedRows.map(r=>fmtDate(r.date)) : closedRows.map(c => c.email ? c.email.split('@')[0] : fmtDate(c.date));
+  destroyChart('chartRevCash');
+  const ctx2 = document.getElementById('chartRevCash');
+  if (ctx2) charts['chartRevCash'] = new Chart(ctx2, {
+    type: 'bar',
+    data: { labels: rvLabels, datasets: [
+      { label:'Revenue', data: closedRows.map(r=>Number(r.rev)||0), backgroundColor:'rgba(52,211,153,.5)', borderRadius:3 },
+      { label:'Cash',    data: closedRows.map(r=>Number(r.cash)||0), backgroundColor:'rgba(34,211,238,.5)', borderRadius:3 }
+    ]},
+    options: { ...chartDefaults }
+  });
+
+  let runTotal = 0;
+  const logRows = days.filter(d => d <= dayOfMonth && dailyMap[d]).map(d => {
+    runTotal += dailyMap[d]||0;
+    const pace = goal / daysInMonth * d;
+    const delta = runTotal - pace;
+    return `<tr>
+      <td class="mono">Day ${d}</td>
+      <td class="mono text-cyan">${$$(dailyMap[d]||0)}</td>
+      <td class="mono text-green">${$$(runTotal)}</td>
+      <td class="mono" style="color:${delta>=0?'var(--green)':'var(--red)'}">${delta>=0?'+':''}${$$(delta)}</td>
+    </tr>`;
+  });
+  document.getElementById('fc-log-table').innerHTML = `<table>
+    <thead><tr><th>Day</th><th>Cash</th><th>Running Total</th><th>vs Pace</th></tr></thead>
+    <tbody>${logRows.join('') || '<tr><td colspan="4" style="color:var(--text3)">No cash logged yet this month</td></tr>'}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════
+// SHEET LOADING (live, via gviz JSONP — no Apps Script needed)
+// ═══════════════════════════════════════════════
+let __cbCounter = 0;
+function fetchSheetTab(gid) {
+  return new Promise((resolve) => {
+    if (!gid && gid !== 0) { resolve([]); return; }
+    const cbName = '__sheetCb' + (__cbCounter++);
+    const script = document.createElement('script');
+    let settled = false;
+    window[cbName] = (json) => {
+      settled = true;
+      try { resolve(json.table.rows || []); } catch(e) { resolve([]); }
+      delete window[cbName];
+      script.remove();
+    };
+    script.src = `https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:json;responseHandler:${cbName}&gid=${gid}&t=${Date.now()}`;
+    script.onerror = () => { if(!settled){ resolve([]); delete window[cbName]; script.remove(); } };
+    document.body.appendChild(script);
+    setTimeout(() => { if (!settled) { resolve([]); delete window[cbName]; script.remove(); } }, 8000);
+  });
+}
+
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function cellVal(row, i) { return row.c[i] ? row.c[i].v : null; }
+function gvizDateToString(v) {
+  if (typeof v === 'string' && v.startsWith('Date(')) {
+    const parts = v.slice(5,-1).split(',').map(Number);
+    return (parts[1]+1) + '/' + parts[2] + '/' + parts[0];
+  }
+  return v;
+}
+
+function parseDmRows(rows) {
+  return rows.map(r => ({
+    name: cellVal(r,0) || 'DM Setter',
+    date: gvizDateToString(cellVal(r,1)),
+    leads: cellVal(r,2)||0, qualified: cellVal(r,3)||0, sets: cellVal(r,4)||0,
+    cal: cellVal(r,5)||0, live: cellVal(r,6)||0, closes: cellVal(r,7)||0,
+    downsells: cellVal(r,8)||0, cash: cellVal(r,9)||0, rev: cellVal(r,10)||0,
+    rating: cellVal(r,11)||0, objections: cellVal(r,12)||'', notes: cellVal(r,13)||'',
+  })).filter(r => r.date);
+}
+function parsePhoneRows(rows) {
+  return rows.map(r => ({
+    name: cellVal(r,0) || 'Phone Setter',
+    date: gvizDateToString(cellVal(r,1)),
+    dials: cellVal(r,2)||0, connections: cellVal(r,3)||0, qualified: cellVal(r,4)||0, sets: cellVal(r,5)||0,
+    cal: cellVal(r,6)||0, live: cellVal(r,7)||0, closes: cellVal(r,8)||0, downsells: cellVal(r,9)||0,
+    cash: cellVal(r,10)||0, rev: cellVal(r,11)||0, rating: cellVal(r,12)||0,
+    objections: cellVal(r,13)||'', notes: cellVal(r,14)||'',
+  })).filter(r => r.date);
+}
+function parseCallRows(rows) {
+  return rows.map(r => ({
+    closer: cellVal(r,0)||'', date: gvizDateToString(cellVal(r,1)), email: cellVal(r,2)||'',
+    summary: cellVal(r,3)||'', offer: cellVal(r,4)||'', status: cellVal(r,5)||'',
+    cash: cellVal(r,6)||0, rev: cellVal(r,7)||0, recording: cellVal(r,8)||'',
+  })).filter(r => r.date);
+}
+
+function setSync(state, text){
+  document.getElementById('syncTime').textContent = text;
+  document.getElementById('errBanner').classList.toggle('show', state==='err');
+}
+
+async function syncData() {
+  const btn = document.getElementById('syncBtn');
+  btn.textContent = '↻ Syncing…';
+  btn.disabled = true;
+  setSync('loading', 'Loading sheet…');
+  try {
+    const [dmRows, phoneRows, callRows] = await Promise.all([
+      fetchSheetTab(CFG.gidDm),
+      fetchSheetTab(CFG.gidPhone),
+      fetchSheetTab(CFG.gidCalls),
+    ]);
+    DATA.dm = parseDmRows(dmRows);
+    DATA.phone = parsePhoneRows(phoneRows);
+    DATA.calls = parseCallRows(callRows);
+    setSync('ok', 'Synced ' + new Date().toLocaleTimeString());
+    renderActivePage();
+  } catch(e) {
+    console.error(e);
+    setSync('err', 'Sync failed');
+  } finally {
+    btn.textContent = '↻ Refresh';
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SETUP PAGE
+// ═══════════════════════════════════════════════
+function saveConfig() {
+  CFG.sheetId = document.getElementById('cfgSheetId').value.trim() || DEFAULT_CONFIG.sheetId;
+  CFG.goal = Number(document.getElementById('cfgGoal').value) || DEFAULT_CONFIG.goal;
+  CFG.gidDm = document.getElementById('cfgGidDm').value.trim();
+  CFG.gidPhone = document.getElementById('cfgGidPhone').value.trim();
+  CFG.gidCalls = document.getElementById('cfgGidCalls').value.trim();
+  localStorage.setItem('janier_cfg', JSON.stringify(CFG));
+  document.getElementById('setupResult').textContent = 'Saved. Refreshing…';
+  syncData();
+}
+function fillConfigForm() {
+  document.getElementById('cfgSheetId').value = CFG.sheetId;
+  document.getElementById('cfgGoal').value = CFG.goal;
+  document.getElementById('cfgGidDm').value = CFG.gidDm;
+  document.getElementById('cfgGidPhone').value = CFG.gidPhone;
+  document.getElementById('cfgGidCalls').value = CFG.gidCalls;
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+(function init() {
+  fillConfigForm();
+  syncData();
+})();
 </script>
 </body>
 </html>
