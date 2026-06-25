@@ -29,6 +29,9 @@ nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg1);border
 .nav-tab.active{color:var(--violet);background:rgba(139,92,246,.12)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .period-btns{display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px}
+.date-range{display:flex;align-items:center;gap:6px}
+.date-range input{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 9px;font-size:11px;color:var(--text);font-family:'JetBrains Mono',monospace;width:118px;outline:none}
+.date-range input:focus{border-color:var(--violet)}
 .period-btn{padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--text2);border:none;background:none;transition:all .15s}
 .period-btn.active{color:var(--text);background:var(--bg4)}
 .sync-info{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap}
@@ -152,6 +155,12 @@ input[type=text]:focus,input[type=number]:focus{border-color:var(--violet)}
       <button class="period-btn" onclick="setPeriod('week')">Week</button>
       <button class="period-btn" onclick="setPeriod('month')">Month</button>
       <button class="period-btn active" onclick="setPeriod('all')">All</button>
+      <button class="period-btn" id="customPeriodBtn" onclick="setPeriod('custom')">Custom</button>
+    </div>
+    <div class="date-range" id="dateRangeInputs" style="display:none">
+      <input type="text" id="dateFrom" placeholder="From (M/D/YYYY)" onchange="setCustomRange()">
+      <span style="color:var(--text3);font-size:11px">to</span>
+      <input type="text" id="dateTo" placeholder="To (M/D/YYYY)" onchange="setCustomRange()">
     </div>
     <div class="sync-info" id="syncTime">Loading sheet…</div>
     <button class="btn btn-violet" id="syncBtn" onclick="syncData()">↻ Refresh</button>
@@ -285,7 +294,7 @@ input[type=text]:focus,input[type=number]:focus{border-color:var(--violet)}
       </div>
     </div>
     <div class="chart-card" style="margin-top:14px">
-      <div class="chart-title">Sets Per Day</div>
+      <div class="chart-title" id="chartSetsDayTitle">Sets Per Day</div>
       <div class="chart-wrap-sm"><canvas id="chartSetsDay"></canvas></div>
     </div>
   </div>
@@ -448,6 +457,8 @@ let CFG = loadConfig();
 // ═══════════════════════════════════════════════
 let DATA = { dm: [], phone: [], calls: [] };
 let currentPeriod = 'all';
+let customFrom = null;
+let customTo = null;
 let currentRepView = 'dm';
 let clPage = 1;
 const CL_PAGE_SIZE = 15;
@@ -493,6 +504,12 @@ function inPeriod(date) {
   if (currentPeriod === 'all') return true;
   if (currentPeriod === 'week') { const [a,b] = getWeekRange(); return d >= a && d <= b; }
   if (currentPeriod === 'month') { const [a,b] = getMonthRange(); return d >= a && d <= b; }
+  if (currentPeriod === 'custom') {
+    if (!customFrom && !customTo) return true;
+    if (customFrom && d < customFrom) return false;
+    if (customTo && d > customTo) return false;
+    return true;
+  }
   return false;
 }
 function getFilteredData() {
@@ -543,6 +560,15 @@ function setPeriod(p) {
   currentPeriod = p;
   document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
   [...document.querySelectorAll('.period-btn')].forEach(b => { if (b.getAttribute('onclick') === `setPeriod('${p}')`) b.classList.add('active'); });
+  document.getElementById('dateRangeInputs').style.display = p === 'custom' ? 'flex' : 'none';
+  renderActivePage();
+}
+function setCustomRange() {
+  const fromVal = document.getElementById('dateFrom').value.trim();
+  const toVal = document.getElementById('dateTo').value.trim();
+  customFrom = fromVal ? parseDate(fromVal) : null;
+  customTo = toVal ? parseDate(toVal) : null;
+  if (customTo) customTo.setHours(23,59,59,999);
   renderActivePage();
 }
 function renderActivePage() {
@@ -752,20 +778,57 @@ function renderRepIndividual(dm, phone) {
       renderSetsChart([], []);
       return;
     }
+    const booked = calls.length; // every logged row is a call on the calendar
+    const showed = calls.filter(c=>!['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
+    const offers = calls.filter(c=>c.offer === true || c.offer === 'TRUE' || c.offer === 'true').length;
+    const closes = calls.filter(c=>c.status==='Closed').length;
+    const deposits = calls.filter(c=>c.status==='Deposit').length;
     const cash = calls.reduce((a,c)=>a+(Number(c.cash)||0),0);
     const rev = calls.reduce((a,c)=>a+(Number(c.rev)||0),0);
-    const closes = calls.filter(c=>c.status==='Closed').length;
-    const live = calls.filter(c=>!['No Show','DQ','IGNORE','Cancelled','Bad Fit'].includes(c.status)).length;
-    statsEl.innerHTML = `<div class="grid-4">
-      ${kc('Calls Taken', num(calls.length), 'var(--cyan)')}
-      ${kc('Closes', num(closes), 'var(--green)')}
-      ${kc('Cash Collected', $$(cash), 'var(--cyan)')}
-      ${kc('Close Rate', pct(closes, live), 'var(--violet)')}
-    </div>`;
-    funnelEl.innerHTML = '';
-    tableEl.innerHTML = `<table><thead><tr><th>Date</th><th>Email</th><th>Status</th><th>Cash</th></tr></thead>
-      <tbody>${calls.slice(0,12).map(c=>`<tr><td class="mono">${fmtDate(c.date)}</td><td>${c.email||'—'}</td><td>${c.status||'—'}</td><td class="mono">${$$(c.cash)}</td></tr>`).join('')}</tbody></table>`;
-    renderSetsChart(calls.map(c=>fmtDate(c.date)), calls.map(c=>c.status==='Closed'?1:0), 'Closes');
+
+    const showRate = pct(showed, booked);
+    const closeRate = pct(closes, showed);
+    const offerCloseRate = pct(closes, offers);
+    const offerRate = pct(offers, showed);
+    const cashCollectedRate = pct(cash, rev);
+    const cashPerBooked = booked ? cash/booked : 0;
+    const cashPerShowed = showed ? cash/showed : 0;
+    const cashPerClosed = closes ? cash/closes : 0;
+
+    statsEl.innerHTML = `
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('Calls On Calendar', num(booked), 'var(--cyan)')}
+        ${kc('Calls That Showed', num(showed), 'var(--violet)')}
+        ${kc('Offers Made', num(offers), 'var(--amber)')}
+        ${kc('Total Closes', num(closes), 'var(--green)')}
+        ${kc('Total Deposits', num(deposits), 'var(--pink)')}
+      </div>
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('Show Rate', showRate, 'var(--violet)')}
+        ${kc('Close Rate', closeRate, 'var(--green)')}
+        ${kc('Offer Rate', offerRate, 'var(--amber)')}
+        ${kc('Offer → Close Rate', offerCloseRate, 'var(--pink)')}
+        ${kc('Cash Collected Rate', cashCollectedRate, 'var(--cyan)')}
+      </div>
+      <div class="grid-5" style="margin-bottom:10px">
+        ${kc('Cash / Call Booked', $$(cashPerBooked), 'var(--cyan)')}
+        ${kc('Cash / Call Showed', $$(cashPerShowed), 'var(--violet)')}
+        ${kc('Cash / Call Closed', $$(cashPerClosed), 'var(--green)')}
+        ${kc('Total Cash Collected', $$(cash), 'var(--cyan)')}
+        ${kc('Total Revenue Generated', $$(rev), 'var(--green)')}
+      </div>`;
+
+    renderFunnel([
+      {label:'Booked',val:booked},{label:'Showed',val:showed},
+      {label:'Offered',val:offers},{label:'Closed',val:closes},
+    ]);
+    tableEl.innerHTML = `<table><thead><tr><th>Date</th><th>Email</th><th>Status</th><th>Offer</th><th>Cash</th><th>Rev</th></tr></thead>
+      <tbody>${calls.slice(0,15).map(c=>`<tr><td class="mono">${fmtDate(c.date)}</td><td>${c.email||'—'}</td><td>${c.status||'—'}</td><td>${c.offer===true||c.offer==='TRUE'?'Yes':'No'}</td><td class="mono">${$$(c.cash)}</td><td class="mono">${$$(c.rev)}</td></tr>`).join('')}</tbody></table>`;
+
+    const revByDate = {};
+    calls.forEach(c => { const d = fmtDate(c.date); revByDate[d] = (revByDate[d]||0) + (Number(c.rev)||0); });
+    const dates = Object.keys(revByDate).sort((a,b)=>parseDate(a)-parseDate(b));
+    renderSetsChart(dates, dates.map(d=>revByDate[d]), 'Revenue Over Time', 'Revenue Over Time');
     return;
   }
 
@@ -888,8 +951,10 @@ function renderRepTable(headers, rows) {
   el.innerHTML = `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
     <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c===0?0:(c||'—')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
-function renderSetsChart(labels, data, label) {
+function renderSetsChart(labels, data, label, title) {
   destroyChart('chartSetsDay');
+  const titleEl = document.getElementById('chartSetsDayTitle');
+  if (titleEl) titleEl.textContent = title || 'Sets Per Day';
   const ctx = document.getElementById('chartSetsDay');
   if (!ctx) return;
   charts['chartSetsDay'] = new Chart(ctx, {
